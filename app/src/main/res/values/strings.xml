@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">ToDoApp</string>
+    <string name="info_symbol">ⓘ</string>
+    <string name="example_text">TodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTodoTod</string>
+    <string name="cancel">Cancel</string>
+    <string name="save_button_text">СОХРАНИТЬ</string>
+    <string name="task_description">Task description</string>
+    <string name="importance">Важность</string>
+    <string name="deadline">Сделать до</string>
+    <string name="delete">Удалить</string>
+    <string name="done">Выполнено –</string>
+    <string name="num_example">123</string>
+    <string name="hide_done_tasks">hide_done_tasks</string>
+    <string name="enter_the_task">Введите задачу</string>
+    <string name="choose_the_date">Выберите дату</string>
+</resources>

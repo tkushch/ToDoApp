@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/overlay"
+    android:orientation="vertical">
+
+   <LinearLayout
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"
+       android:background="@color/overlay"
+       android:orientation="vertical"
+       android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+
+        <ImageButton
+            android:id="@+id/buttonCancel"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/baseline_close_24"
+            android:contentDescription="@string/cancel"
+
+            />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/buttonSave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:paddingEnd="0dp"
+            android:text="@string/save_button_text"
+            android:textColor="@color/blue"
+            android:textSize="@dimen/button" />
+
+
+    </LinearLayout>
+
+
+    <EditText
+        android:layout_marginTop="20dp"
+        android:id="@+id/taskText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rounded_edittext"
+        android:gravity="top"
+        android:hint="@string/task_description"
+        android:minLines="3"
+        android:padding="10dp"
+        android:textSize="@dimen/body"
+
+        />
+
+    <TextView
+        android:layout_marginTop="20dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/importance"
+        android:textColor="@color/black"
+        android:textSize="@dimen/subhead" />
+
+    <Spinner
+        android:id="@+id/importanceSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/importance_array" />
+       <LinearLayout
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:layout_marginTop="20dp"
+           android:orientation="horizontal">
+
+           <TextView
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:text="@string/deadline"
+               android:textColor="@color/black"
+               android:textSize="@dimen/subhead" />
+
+           <com.google.android.material.switchmaterial.SwitchMaterial
+               android:id="@+id/dueDateSwitch"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_marginStart="16dp" />
+
+           <TextView
+               android:id="@+id/dueDateText"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_marginStart="8dp"
+               android:background="@android:color/transparent"
+               android:clickable="true"
+               android:focusable="true"
+               android:gravity="center_vertical"
+               android:paddingStart="4dp"
+               android:text=""
+               android:textColor="@color/black"
+               android:textSize="@dimen/subhead" />
+
+       </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/buttonDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal"
+        >
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/baseline_delete_24"
+            android:layout_gravity="center"/>
+
+        <TextView
+            android:layout_gravity="center"
+            android:paddingStart="4dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:text="@string/delete"
+            android:textColor="@color/red"
+            android:textSize="@dimen/button" />
+    </LinearLayout>
+
+   </LinearLayout>
+</LinearLayout>
