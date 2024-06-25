@@ -1,4 +1,4 @@
-package com.example.todoapp
+package com.example.todoapp.presentation.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,6 +9,11 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.todoapp.R
+import com.example.todoapp.presentation.ui.adapter.TodoAdapter
+import com.example.todoapp.TodoApp
+import com.example.todoapp.data.model.TodoItem
+import com.example.todoapp.data.repository.TodoItemsRepository
 
 class MainFragment : Fragment(), TodoAdapter.OnTasksChangeListener {
 
@@ -32,7 +37,10 @@ class MainFragment : Fragment(), TodoAdapter.OnTasksChangeListener {
 
 
         todoItemsRepository = (requireActivity().application as TodoApp).todoItemsRepository
-        updateTasks()
+        currentTasks.clear()
+        currentTasks.addAll(todoItemsRepository.getTodoItems().filter {
+            if (showCompletedTasks) true else !it.done
+        })
 
         doneCounter = view.findViewById(R.id.doneCounter)
         tasksRecyclerView = view.findViewById(R.id.tasksRecyclerView)
@@ -54,10 +62,10 @@ class MainFragment : Fragment(), TodoAdapter.OnTasksChangeListener {
         showCompletedTasks = !showCompletedTasks
         button.setImageResource(if (showCompletedTasks) R.drawable.eye_on else R.drawable.eye_off)
         updateTasks()
-        todoAdapter.updateTasks(currentTasks)
-        tasksRecyclerView.post {
-            todoAdapter.notifyDataSetChanged()
-        }
+//        todoAdapter.updateTasks(currentTasks)
+//        tasksRecyclerView.post {
+//            todoAdapter.notifyDataSetChanged()
+//        }
     }
 
     private fun updateTasks() {
@@ -66,14 +74,18 @@ class MainFragment : Fragment(), TodoAdapter.OnTasksChangeListener {
             if (showCompletedTasks) true else !it.done
         })
 
+        tasksRecyclerView.post {
+            todoAdapter.notifyDataSetChanged()
+        }
+
     }
 
     override fun onTasksChanged() {
         updateTasks()
-        todoAdapter.updateTasks(currentTasks)
-        tasksRecyclerView.post {
-            todoAdapter.notifyDataSetChanged()
-        }
+//        todoAdapter.updateTasks(currentTasks)
+//        tasksRecyclerView.post {
+//            todoAdapter.notifyDataSetChanged()
+//        }
         updateDoneCounter()
 
     }

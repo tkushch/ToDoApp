@@ -1,5 +1,6 @@
+package com.example.todoapp.presentation.ui
+
 import android.app.DatePickerDialog
-import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.LayoutInflater
@@ -10,15 +11,14 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.Spinner
-import android.widget.Switch
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.example.todoapp.Importance
+import com.example.todoapp.data.model.Importance
 import com.example.todoapp.R
 import com.example.todoapp.TodoApp
-import com.example.todoapp.TodoItemsRepository
-import com.example.todoapp.stringToImportance
+import com.example.todoapp.data.repository.TodoItemsRepository
+import com.example.todoapp.data.model.stringToImportance
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*

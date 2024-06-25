@@ -1,4 +1,4 @@
-package com.example.todoapp
+package com.example.todoapp.presentation.ui.adapter
 
 import android.graphics.Color
 import android.graphics.Paint
@@ -9,6 +9,9 @@ import android.widget.CheckBox
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.todoapp.R
+import com.example.todoapp.data.model.Importance
+import com.example.todoapp.data.model.TodoItem
 import java.time.LocalDateTime
 
 
@@ -41,9 +44,9 @@ class TodoAdapter(
 
     override fun getItemCount() = todoItems.size
 
-    fun updateTasks(newTasks: MutableList<TodoItem>) {
-        todoItems = newTasks
-    }
+//    fun updateTasks(newTasks: MutableList<TodoItem>) {
+//        todoItems = newTasks
+//    }
 
     class TodoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvTodoText: TextView = itemView.findViewById(R.id.mainText)

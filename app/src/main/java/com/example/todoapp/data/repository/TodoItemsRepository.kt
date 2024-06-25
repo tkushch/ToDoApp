@@ -1,5 +1,8 @@
-package com.example.todoapp
+package com.example.todoapp.data.repository
+import com.example.todoapp.data.model.Importance
+import com.example.todoapp.data.model.TodoItem
 import java.time.LocalDateTime
+import java.util.UUID
 
 class TodoItemsRepository {
     private val todoItems: MutableList<TodoItem> = mutableListOf()
@@ -14,7 +17,7 @@ class TodoItemsRepository {
 
     fun addTodoItem(taskText: String, importance: Importance, deadline: LocalDateTime?){
         val newTask = TodoItem(
-            id = java.util.UUID.randomUUID().toString(),
+            id = UUID.randomUUID().toString(),
             text = taskText,
             importance = importance,
             deadline = deadline,

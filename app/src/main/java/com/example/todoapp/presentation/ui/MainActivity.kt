@@ -1,12 +1,14 @@
-package com.example.todoapp
+package com.example.todoapp.presentation.ui
 
-import AddTaskFragment
-import AddTaskViewModel
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isInvisible
 import androidx.fragment.app.commit
+import com.example.todoapp.R
+import com.example.todoapp.presentation.ui.adapter.TodoAdapter
+import com.example.todoapp.TodoApp
+import com.example.todoapp.data.repository.TodoItemsRepository
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskEditListener {
