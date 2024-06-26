@@ -1,4 +1,4 @@
-package com.example.todoapp
+package com.example.todoapp.presentation.ui.adapter
 
 import android.graphics.Color
 import android.graphics.Paint
@@ -8,16 +8,24 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.todoapp.R
+import com.example.todoapp.data.model.Importance
+import com.example.todoapp.data.model.TodoItem
+import com.example.todoapp.data.repository.TodoItemsRepository
 import java.time.LocalDateTime
 
 
 class TodoAdapter(
-    private var todoItems: MutableList<TodoItem>,
+
+    private val todoItemsRepository: TodoItemsRepository,
     private val onTasksChangedListener: OnTasksChangeListener,
     private val onTaskEditListener: OnTaskEditListener
 ) :
-    RecyclerView.Adapter<TodoAdapter.TodoViewHolder>() {
+
+    ListAdapter<TodoItem, TodoAdapter.TodoViewHolder>(TodoDiffCallback()) {
 
     interface OnTasksChangeListener {
         fun onTasksChanged()
@@ -35,26 +43,24 @@ class TodoAdapter(
     }
 
     override fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
-        val currentItem = todoItems[position]
-        holder.bind(currentItem, onTasksChangedListener, onTaskEditListener)
+
+        val currentItem = getItem(position)
+
+        holder.bind(currentItem, onTasksChangedListener, onTaskEditListener, todoItemsRepository)
     }
 
-    override fun getItemCount() = todoItems.size
-
-    fun updateTasks(newTasks: MutableList<TodoItem>) {
-        todoItems = newTasks
-    }
 
     class TodoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val tvTodoText: TextView = itemView.findViewById(R.id.mainText)
-        val checkBox: CheckBox = itemView.findViewById(R.id.checkboxCompleted)
-        val tvImportance: TextView = itemView.findViewById(R.id.importanceFlag)
-        val editButton: LinearLayout = itemView.findViewById(R.id.editTaskClickArea)
+        private val tvTodoText: TextView = itemView.findViewById(R.id.mainText)
+        private val checkBox: CheckBox = itemView.findViewById(R.id.checkboxCompleted)
+        private val tvImportance: TextView = itemView.findViewById(R.id.importanceFlag)
+        private val editClickArea: LinearLayout = itemView.findViewById(R.id.editTaskClickArea)
 
         fun bind(
             todoItem: TodoItem,
             onTasksChangedListener: OnTasksChangeListener,
-            onTaskEditListener: OnTaskEditListener
+            onTaskEditListener: OnTaskEditListener,
+            todoItemsRepository: TodoItemsRepository
         ) {
             tvTodoText.text = todoItem.text
             checkBox.setOnCheckedChangeListener(null)
@@ -63,13 +69,14 @@ class TodoAdapter(
 
             checkBox.setOnCheckedChangeListener { _, isChecked ->
                 if (checkBox.isChecked != todoItem.done) {
-                    todoItem.done = isChecked
+                    todoItemsRepository.changeTodoItemDoneStatus(todoItem.id)
+
                     updateTextDecoration(tvTodoText, isChecked)
                     onTasksChangedListener.onTasksChanged()
                 }
             }
 
-            editButton.setOnClickListener {
+            editClickArea.setOnClickListener {
                 onTaskEditListener.onTaskEdit(todoItem.id)
             }
 
@@ -90,12 +97,13 @@ class TodoAdapter(
                 }
             }
 
-            if (!todoItem.done && todoItem.deadline != null && todoItem.deadline!! <= LocalDateTime.now()) {
+            if (!todoItem.done && todoItem.deadline != null && todoItem.deadline <= LocalDateTime.now()) {
                 tvTodoText.setTextColor(Color.RED)
             } else {
                 tvTodoText.setTextColor(Color.BLACK)
             }
         }
+
 
         private fun updateTextDecoration(tv: TextView, done: Boolean) {
             if (done) {
@@ -103,6 +111,17 @@ class TodoAdapter(
             } else {
                 tv.paintFlags = tv.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
             }
+        }
+    }
+
+
+    class TodoDiffCallback : DiffUtil.ItemCallback<TodoItem>() {
+        override fun areItemsTheSame(oldItem: TodoItem, newItem: TodoItem): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: TodoItem, newItem: TodoItem): Boolean {
+            return oldItem == newItem
         }
     }
 
