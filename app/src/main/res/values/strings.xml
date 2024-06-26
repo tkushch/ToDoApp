@@ -13,4 +13,5 @@
     <string name="hide_done_tasks">hide_done_tasks</string>
     <string name="enter_the_task">Введите задачу</string>
     <string name="choose_the_date">Выберите дату</string>
+    <string name="my_tasks">Мои дела</string>
 </resources>

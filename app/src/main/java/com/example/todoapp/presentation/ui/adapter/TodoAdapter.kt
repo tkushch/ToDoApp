@@ -43,9 +43,7 @@ class TodoAdapter(
     }
 
     override fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
-
         val currentItem = getItem(position)
-
         holder.bind(currentItem, onTasksChangedListener, onTaskEditListener, todoItemsRepository)
     }
 

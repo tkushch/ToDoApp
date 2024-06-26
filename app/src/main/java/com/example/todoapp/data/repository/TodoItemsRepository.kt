@@ -20,6 +20,10 @@ class TodoItemsRepository {
         return todoItems.filter { !it.done }
     }
 
+    fun getNumCompletedTodoItems(): Int {
+        return todoItems.count { it.done }
+    }
+
     fun addTodoItem(taskText: String, importance: Importance, deadline: LocalDateTime?) {
         val newTask = TodoItem(
             id = UUID.randomUUID().toString(),
