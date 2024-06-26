@@ -4,12 +4,12 @@ import java.time.LocalDateTime
 
 data class TodoItem(
     val id: String,
-    var text: String,
-    var importance: Importance,
-    var deadline: LocalDateTime?,
-    var done: Boolean,
+    val text: String,
+    val importance: Importance,
+    val deadline: LocalDateTime?,
+    val done: Boolean,
     val creationDate: LocalDateTime,
-    var updatedDate: LocalDateTime?
+    val updatedDate: LocalDateTime?
 )
 
 enum class Importance {

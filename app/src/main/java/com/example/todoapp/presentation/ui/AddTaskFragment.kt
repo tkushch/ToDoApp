@@ -13,8 +13,6 @@ import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import com.example.todoapp.data.model.Importance
 import com.example.todoapp.R
 import com.example.todoapp.TodoApp
 import com.example.todoapp.data.repository.TodoItemsRepository
@@ -22,25 +20,14 @@ import com.example.todoapp.data.model.stringToImportance
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import androidx.lifecycle.ViewModel
-
-
-class AddTaskViewModel : ViewModel() {
-    var onSaveListener: ((String, Importance, LocalDateTime?) -> Unit)? = null
-    var taskId: String? = null
-}
 
 
 class AddTaskFragment() : Fragment() {
-    private val addTaskViewModel: AddTaskViewModel by activityViewModels()
     private var deadline: LocalDateTime? = null
     private lateinit var dueDateText: TextView
     private lateinit var todoItemsRepository: TodoItemsRepository
+    private var id: String? = null
 
-
-    fun setOnSaveListener(listener: (String, Importance, LocalDateTime?) -> Unit) {
-        addTaskViewModel.onSaveListener = listener
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,6 +38,8 @@ class AddTaskFragment() : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        id = arguments?.getString(TASK_ID)
 
         todoItemsRepository = (requireActivity().application as TodoApp).todoItemsRepository
 
@@ -63,7 +52,7 @@ class AddTaskFragment() : Fragment() {
             view.findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.dueDateSwitch)
         dueDateText = view.findViewById(R.id.dueDateText)
         dueDateSwitch.isChecked = false
-        dueDateText.isEnabled  = false
+        dueDateText.isEnabled = false
 
         addButton.setOnClickListener {
             val text = taskText.text.toString().trim()
@@ -72,11 +61,13 @@ class AddTaskFragment() : Fragment() {
             if (TextUtils.isEmpty(text)) {
                 taskText.error = getString(R.string.enter_the_task)
             } else {
-                if (addTaskViewModel.taskId != null) {
-                    todoItemsRepository.updateTodoItem(addTaskViewModel.taskId.toString(), text, importance, deadline)
-                } else {
-                    addTaskViewModel.onSaveListener?.invoke(text, importance, deadline)
+
+                id?.let {
+                    todoItemsRepository.updateTodoItem(it, text, importance, deadline)
+                } ?: run {
+                    todoItemsRepository.addTodoItem(text, importance, deadline)
                 }
+
                 parentFragmentManager.popBackStack()
             }
         }
@@ -86,9 +77,10 @@ class AddTaskFragment() : Fragment() {
         }
 
         deleteButton.setOnClickListener {
-            addTaskViewModel.taskId?.let {
-                todoItemsRepository.removeTodoItemById(addTaskViewModel.taskId.toString())
+            id?.let {
+                todoItemsRepository.removeTodoItemById(it)
             }
+
             parentFragmentManager.popBackStack()
         }
 
@@ -107,8 +99,8 @@ class AddTaskFragment() : Fragment() {
             showDatePicker()
         }
 
-        if (addTaskViewModel.taskId != null && todoItemsRepository.findTodoItemById(addTaskViewModel.taskId.toString()) != null) {
-            val todoItem = todoItemsRepository.findTodoItemById(addTaskViewModel.taskId.toString())
+        if (id != null && todoItemsRepository.findTodoItemById(id as String) != null) {
+            val todoItem = todoItemsRepository.findTodoItemById(id as String)
             taskText.setText(todoItem?.text)
             importanceSpinner.setSelection(todoItem?.importance?.ordinal ?: 0)
             deadline = todoItem?.deadline
@@ -139,4 +131,17 @@ class AddTaskFragment() : Fragment() {
         )
         datePickerDialog.show()
     }
+
+    companion object {
+        const val TASK_ID = "taskId"
+        fun newInstance(taskId: String?): AddTaskFragment {
+            return AddTaskFragment().apply {
+                arguments = Bundle().apply {
+                    putString(TASK_ID, taskId)
+                }
+            }
+        }
+    }
 }
+
+

@@ -1,7 +1,6 @@
 package com.example.todoapp.presentation.ui
 
 import android.os.Bundle
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isInvisible
 import androidx.fragment.app.commit
@@ -14,7 +13,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskEditListener {
     private lateinit var fab: FloatingActionButton
     private lateinit var todoItemsRepository: TodoItemsRepository
-    private val addTaskViewModel: AddTaskViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,13 +34,8 @@ class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskEditListener {
     private fun showAddTaskFragment(taskId: String? = null) {
         fab.isEnabled = false
         fab.isInvisible = true
-        addTaskViewModel.taskId = taskId
-        addTaskViewModel.onSaveListener = { taskText, importance, deadline ->
-            todoItemsRepository.addTodoItem(taskText, importance, deadline)
-            supportFragmentManager.popBackStack()
-        }
 
-        val fragment = AddTaskFragment()
+        val fragment = AddTaskFragment.newInstance(taskId)
 
         supportFragmentManager.addOnBackStackChangedListener {
             if (supportFragmentManager.backStackEntryCount == 0) {
