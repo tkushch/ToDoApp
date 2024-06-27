@@ -1,4 +1,4 @@
-package com.example.todoapp.presentation.ui.viewmodel
+package com.example.todoapp.presentation.ui.main_screen.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -18,7 +18,7 @@ class TasksViewModel : ViewModel() {
         updateTasks()
     }
 
-    private lateinit var todoItemsRepository: TodoItemsRepository
+    private var todoItemsRepository: TodoItemsRepository? = null
     fun setTodoItemsRepository(todoItemsRepository: TodoItemsRepository) {
         this.todoItemsRepository = todoItemsRepository
         updateTasks()
@@ -26,11 +26,11 @@ class TasksViewModel : ViewModel() {
 
     fun updateTasks() {
         if (_showCompletedTasks.value == true) {
-            _currentTasks.value = todoItemsRepository.getTodoItems()
+            _currentTasks.value = todoItemsRepository?.getTodoItems()
         } else {
-            _currentTasks.value = todoItemsRepository.getUncompletedTodoItems()
+            _currentTasks.value = todoItemsRepository?.getUncompletedTodoItems()
         }
-        _numberOfCompletedTasks.value  = todoItemsRepository.getNumCompletedTodoItems()
+        _numberOfCompletedTasks.value  = todoItemsRepository?.getNumCompletedTodoItems()
     }
 
     private val _numberOfCompletedTasks  = MutableLiveData<Int>(0)

@@ -1,4 +1,4 @@
-package com.example.todoapp.presentation.ui.adapter
+package com.example.todoapp.presentation.ui.main_screen.adapter
 
 import android.graphics.Color
 import android.graphics.Paint
@@ -63,15 +63,13 @@ class TodoAdapter(
             tvTodoText.text = todoItem.text
             checkBox.setOnCheckedChangeListener(null)
             checkBox.isChecked = todoItem.done
-            updateTextDecoration(tvTodoText, todoItem.done)
+            updateTextDecoration(tvTodoText, todoItem.done, todoItem.deadline)
 
             checkBox.setOnCheckedChangeListener { _, isChecked ->
-                if (checkBox.isChecked != todoItem.done) {
-                    todoItemsRepository.changeTodoItemDoneStatus(todoItem.id)
+                todoItemsRepository.changeTodoItemDoneStatus(todoItem.id)
+                updateTextDecoration(tvTodoText, isChecked, todoItem.deadline)
+                onTasksChangedListener.onTasksChanged()
 
-                    updateTextDecoration(tvTodoText, isChecked)
-                    onTasksChangedListener.onTasksChanged()
-                }
             }
 
             editClickArea.setOnClickListener {
@@ -94,20 +92,20 @@ class TodoAdapter(
                     tvImportance.setTextColor(Color.RED)
                 }
             }
-
-            if (!todoItem.done && todoItem.deadline != null && todoItem.deadline <= LocalDateTime.now()) {
-                tvTodoText.setTextColor(Color.RED)
-            } else {
-                tvTodoText.setTextColor(Color.BLACK)
-            }
         }
 
 
-        private fun updateTextDecoration(tv: TextView, done: Boolean) {
+        private fun updateTextDecoration(tv: TextView, done: Boolean, deadline: LocalDateTime?) {
             if (done) {
                 tv.paintFlags = tv.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
             } else {
                 tv.paintFlags = tv.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+            }
+
+            if (!done && deadline != null && deadline <= LocalDateTime.now()) {
+                tvTodoText.setTextColor(Color.RED)
+            } else {
+                tvTodoText.setTextColor(Color.BLACK)
             }
         }
     }

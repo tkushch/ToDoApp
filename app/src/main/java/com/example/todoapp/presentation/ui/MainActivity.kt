@@ -5,9 +5,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isInvisible
 import androidx.fragment.app.commit
 import com.example.todoapp.R
-import com.example.todoapp.presentation.ui.adapter.TodoAdapter
+import com.example.todoapp.presentation.ui.main_screen.adapter.TodoAdapter
 import com.example.todoapp.TodoApp
 import com.example.todoapp.data.repository.TodoItemsRepository
+import com.example.todoapp.presentation.ui.edit_screen.EditTaskFragment
+import com.example.todoapp.presentation.ui.main_screen.MainFragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskEditListener {
@@ -35,7 +37,7 @@ class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskEditListener {
         fab.isEnabled = false
         fab.isInvisible = true
 
-        val fragment = AddTaskFragment.newInstance(taskId)
+        val fragment = EditTaskFragment.newInstance(taskId)
 
         supportFragmentManager.addOnBackStackChangedListener {
             if (supportFragmentManager.backStackEntryCount == 0) {

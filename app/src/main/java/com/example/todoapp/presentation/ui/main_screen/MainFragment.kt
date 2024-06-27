@@ -1,4 +1,4 @@
-package com.example.todoapp.presentation.ui
+package com.example.todoapp.presentation.ui.main_screen
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,13 +10,15 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.R
-import com.example.todoapp.presentation.ui.adapter.TodoAdapter
+import com.example.todoapp.presentation.ui.main_screen.adapter.TodoAdapter
 import com.example.todoapp.TodoApp
 import androidx.fragment.app.activityViewModels
-import com.example.todoapp.presentation.ui.viewmodel.TasksViewModel
+import com.example.todoapp.presentation.ui.MainActivity
+import com.example.todoapp.presentation.ui.main_screen.viewmodel.TasksViewModel
 
 class MainFragment : Fragment(), TodoAdapter.OnTasksChangeListener {
     private val tasksViewModel: TasksViewModel by activityViewModels()
+    private var todoAdapter : TodoAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -38,11 +40,11 @@ class MainFragment : Fragment(), TodoAdapter.OnTasksChangeListener {
 
         val tasksRecyclerView = view.findViewById<RecyclerView>(R.id.tasksRecyclerView)
         tasksRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        val todoAdapter = TodoAdapter(todoItemsRepository, this, requireActivity() as MainActivity)
+        todoAdapter = TodoAdapter(todoItemsRepository, this, requireActivity() as MainActivity)
         tasksRecyclerView.adapter = todoAdapter
-        todoAdapter.submitList(tasksViewModel.currentTasks.value)
+        todoAdapter?.submitList(tasksViewModel.currentTasks.value)
         tasksViewModel.currentTasks.observe(viewLifecycleOwner) {
-            todoAdapter.submitList(it)
+            todoAdapter?.submitList(it)
         }
 
         val btnToggleVisibility: ImageButton = view.findViewById(R.id.btn_toggle_visibility)
@@ -59,5 +61,6 @@ class MainFragment : Fragment(), TodoAdapter.OnTasksChangeListener {
 
     override fun onTasksChanged() {
         tasksViewModel.updateTasks()
+        todoAdapter?.submitList(tasksViewModel.currentTasks.value)
     }
 }

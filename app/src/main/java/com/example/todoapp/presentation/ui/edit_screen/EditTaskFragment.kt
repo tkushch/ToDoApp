@@ -1,4 +1,4 @@
-package com.example.todoapp.presentation.ui
+package com.example.todoapp.presentation.ui.edit_screen
 
 import android.app.DatePickerDialog
 import android.os.Bundle
@@ -13,16 +13,19 @@ import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import com.example.todoapp.R
 import com.example.todoapp.TodoApp
 import com.example.todoapp.data.repository.TodoItemsRepository
 import com.example.todoapp.data.model.stringToImportance
+import com.example.todoapp.presentation.ui.edit_screen.viewmodel.EditTaskViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
 
-class AddTaskFragment() : Fragment() {
+class EditTaskFragment : Fragment() {
+    private val editTaskViewModel: EditTaskViewModel by activityViewModels()
     private var deadline: LocalDateTime? = null
     private lateinit var dueDateText: TextView
     private lateinit var todoItemsRepository: TodoItemsRepository
@@ -39,9 +42,12 @@ class AddTaskFragment() : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        id = arguments?.getString(TASK_ID)
-
         todoItemsRepository = (requireActivity().application as TodoApp).todoItemsRepository
+        editTaskViewModel.setTodoItemsRepository(todoItemsRepository)
+
+        id = arguments?.getString(TASK_ID)
+        editTaskViewModel.setTodoItem(id)
+
 
         val taskText = view.findViewById<EditText>(R.id.taskText)
         val importanceSpinner = view.findViewById<Spinner>(R.id.importanceSpinner)
@@ -61,13 +67,7 @@ class AddTaskFragment() : Fragment() {
             if (TextUtils.isEmpty(text)) {
                 taskText.error = getString(R.string.enter_the_task)
             } else {
-
-                id?.let {
-                    todoItemsRepository.updateTodoItem(it, text, importance, deadline)
-                } ?: run {
-                    todoItemsRepository.addTodoItem(text, importance, deadline)
-                }
-
+                editTaskViewModel.saveTask(id, text, importance, deadline)
                 parentFragmentManager.popBackStack()
             }
         }
@@ -77,10 +77,7 @@ class AddTaskFragment() : Fragment() {
         }
 
         deleteButton.setOnClickListener {
-            id?.let {
-                todoItemsRepository.removeTodoItemById(it)
-            }
-
+            editTaskViewModel.deleteTask(id)
             parentFragmentManager.popBackStack()
         }
 
@@ -99,8 +96,8 @@ class AddTaskFragment() : Fragment() {
             showDatePicker()
         }
 
-        if (id != null && todoItemsRepository.findTodoItemById(id as String) != null) {
-            val todoItem = todoItemsRepository.findTodoItemById(id as String)
+        if (editTaskViewModel.todoItem != null) {
+            val todoItem = editTaskViewModel.todoItem
             taskText.setText(todoItem?.text)
             importanceSpinner.setSelection(todoItem?.importance?.ordinal ?: 0)
             deadline = todoItem?.deadline
@@ -134,8 +131,8 @@ class AddTaskFragment() : Fragment() {
 
     companion object {
         const val TASK_ID = "taskId"
-        fun newInstance(taskId: String?): AddTaskFragment {
-            return AddTaskFragment().apply {
+        fun newInstance(taskId: String?): EditTaskFragment {
+            return EditTaskFragment().apply {
                 arguments = Bundle().apply {
                     putString(TASK_ID, taskId)
                 }
@@ -143,5 +140,6 @@ class AddTaskFragment() : Fragment() {
         }
     }
 }
+
 
 
