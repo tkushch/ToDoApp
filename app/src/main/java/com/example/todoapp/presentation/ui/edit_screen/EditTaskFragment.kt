@@ -36,7 +36,7 @@ class EditTaskFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_add_task, container, false)
+        return inflater.inflate(R.layout.fragment_edit_task, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
