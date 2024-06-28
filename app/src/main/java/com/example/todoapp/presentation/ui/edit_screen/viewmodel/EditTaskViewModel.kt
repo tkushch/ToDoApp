@@ -1,4 +1,3 @@
-
 package com.example.todoapp.presentation.ui.edit_screen.viewmodel
 
 import androidx.lifecycle.ViewModel
@@ -30,6 +29,12 @@ class EditTaskViewModel() : ViewModel() {
         } ?: run {
             _todoItem = null
         }
+        if (this.id != id) {
+            text = _todoItem?.text
+            importance = _todoItem?.importance
+            deadline = _todoItem?.deadline
+            this.id  = id
+        }
     }
 
     fun deleteTask(id: String?) {
@@ -37,11 +42,13 @@ class EditTaskViewModel() : ViewModel() {
             todoItemsRepository?.removeTodoItemById(it)
         }
     }
-//
-//    var text: String? = null
-//    var importance: Importance?  = null
-//    var deadline: LocalDateTime?  = null
 
+    var id: String?  = null
+
+    // Displayed values
+    var text: String? = null
+    var importance: Importance? = null
+    var deadline: LocalDateTime? = null
 
 
 }

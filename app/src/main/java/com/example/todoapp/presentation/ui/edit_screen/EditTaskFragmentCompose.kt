@@ -93,7 +93,7 @@ class EditTaskFragmentCompose : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 AppTheme {
-                    EditTaskScreen(viewModel = editTaskViewModel) { parentFragmentManager.popBackStack() }
+                    EditTaskScreen(editTaskViewModel) { parentFragmentManager.popBackStack() }
                 }
             }
         }
@@ -116,7 +116,7 @@ class EditTaskFragmentCompose : Fragment() {
 @Composable
 fun previewScreenDark() {
     AppTheme(darkTheme = true) {
-        EditTaskScreen(viewModel = EditTaskViewModel(), goBack = {})
+        EditTaskScreen(EditTaskViewModel(), goBack = {})
     }
 }
 
@@ -124,7 +124,7 @@ fun previewScreenDark() {
 @Composable
 fun previewScreenLight() {
     AppTheme(darkTheme = false) {
-        EditTaskScreen(viewModel = EditTaskViewModel(), goBack = {})
+        EditTaskScreen(EditTaskViewModel(), goBack = {})
     }
 }
 
@@ -132,18 +132,26 @@ fun previewScreenLight() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditTaskScreen(
-    viewModel: EditTaskViewModel = EditTaskViewModel(),
+    vm: EditTaskViewModel = EditTaskViewModel(),
     goBack: () -> Unit = {}
 ) {
-    val item = viewModel.todoItem
+    val item = vm.todoItem
 
     var text by remember {
-        mutableStateOf(item?.text ?: "")
+        mutableStateOf(vm.text ?: item?.text ?: "")
     }
 
-    var priority by remember { mutableStateOf(item?.importance ?: Importance.MEDIUM) }
+    var priority by remember {
+        mutableStateOf(
+            vm.importance ?: item?.importance ?: Importance.MEDIUM
+        )
+    }
 
-    var date by remember { mutableStateOf(item?.deadline) }
+    var date by remember {
+        mutableStateOf(
+            vm.deadline ?: if (vm.text == null) item?.deadline else null
+        )
+    }
 
     var isError by remember { mutableStateOf(false) }
 
@@ -165,7 +173,7 @@ fun EditTaskScreen(
                         {
                             if (text.isNotBlank()) {
                                 isError = false
-                                viewModel.saveTask(
+                                vm.saveTask(
                                     item?.id,
                                     text = text,
                                     importance = priority,
@@ -206,20 +214,20 @@ fun EditTaskScreen(
         ) {
 
             item {
-                EditTextField(text, { text = it; isError = false }, isError)
+                EditTextField(text, { text = it; vm.text = it; isError = false }, isError)
             }
 
             item {
-                PrioritySelector(priority) { priority = it }
+                PrioritySelector(priority) { priority = it; vm.importance = it }
             }
 
             item {
-                DeadlinePicker(item?.deadline) { date = it }
+                DeadlinePicker(date, vm) { date = it; vm.deadline = it }
             }
 
             item {
                 DeleteToDo(item != null) {
-                    viewModel.deleteTask(item?.id)
+                    vm.deleteTask(item?.id)
                     goBack()
                 }
             }
@@ -363,13 +371,15 @@ fun PrioritySelector(
 
 }
 
-@Preview(showBackground  = true)
+@Preview(showBackground = true)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeadlinePicker(
     selectedDate: LocalDateTime? = null,
-    selectDate: (it: LocalDateTime?) -> Unit = {}
-) {
+    vm: EditTaskViewModel? = null,
+    selectDate: (it: LocalDateTime?) -> Unit = {},
+
+    ) {
 
     val getTime: (date: LocalDateTime) -> String = { it ->
         DateTimeFormatter.ofPattern("dd.MM.yyyy").format(it)
@@ -471,7 +481,10 @@ fun DeadlinePicker(
                         date = null
                         calIsView = false
                     }) {
-                        Text("Cancel", color = AppTheme.colorScheme.colorBlue)
+                        Text(
+                            stringResource(R.string.calendar_cancel),
+                            color = AppTheme.colorScheme.colorBlue
+                        )
                     }
 
                     TextButton({
@@ -483,7 +496,10 @@ fun DeadlinePicker(
                         }
                         calIsView = false
                     }) {
-                        Text("Apply", color = AppTheme.colorScheme.colorBlue)
+                        Text(
+                            stringResource(R.string.calendar_ok),
+                            color = AppTheme.colorScheme.colorBlue
+                        )
                     }
                 }
             },
@@ -520,7 +536,7 @@ fun DeadlinePicker(
     }
 }
 
-@Preview(showBackground  = true)
+@Preview(showBackground = true)
 @Composable
 fun DeleteToDo(
     enabled: Boolean = true,

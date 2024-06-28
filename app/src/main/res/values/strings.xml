@@ -18,6 +18,8 @@
     <string name="todo_priority_low">Низкая</string>
     <string name="todo_priority_high">Высокая</string>
     <string name="todo_priority_medium">Средняя</string>
-    <string name="todo_completed">Completed: %d</string>
+    <string name="calendar_ok">ГОТОВО</string>
+    <string name="calendar_cancel">ОТМЕНА</string>
+
     <string name="choose_date_cancel">Выберите будущую дату</string>
 </resources>
