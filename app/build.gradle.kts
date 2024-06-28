@@ -48,23 +48,20 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
+    implementation("androidx.compose.material3:material3:1.2.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.recyclerview:recyclerview-selection:1.1.0")
+    implementation("androidx.compose.ui:ui-tooling-preview-android:1.6.8")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 
-
 //    implementation("androidx.fragment:fragment-ktx:1.3.6")
     implementation("androidx.fragment:fragment-ktx:1.4.0")
 
-    //flow
 //    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-
     //viewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
-
-
     //room
 //    val roomVersion = "2.6.1"
 //    implementation("androidx.room:room-ktx:$roomVersion")
@@ -73,9 +70,10 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:2.7.7")
 
+    implementation("androidx.compose.ui:ui-tooling:1.6.8")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.6.8")
+
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.2.0")
-
     implementation("androidx.compose.material:material:1.4.1")
-
     implementation("androidx.compose.compiler:compiler:1.4.0")
 }

@@ -1,3 +1,4 @@
+
 package com.example.todoapp.presentation.ui.edit_screen.viewmodel
 
 import androidx.lifecycle.ViewModel
@@ -36,6 +37,11 @@ class EditTaskViewModel() : ViewModel() {
             todoItemsRepository?.removeTodoItemById(it)
         }
     }
+//
+//    var text: String? = null
+//    var importance: Importance?  = null
+//    var deadline: LocalDateTime?  = null
+
 
 
 }

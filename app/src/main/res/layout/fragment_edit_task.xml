@@ -3,13 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/overlay"
+    android:background="@color/support_overlay"
     android:orientation="vertical">
 
    <LinearLayout
        android:layout_width="match_parent"
        android:layout_height="match_parent"
-       android:background="@color/overlay"
+       android:background="@color/support_overlay"
        android:orientation="vertical"
        android:padding="16dp">
 
@@ -66,7 +66,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/importance"
-        android:textColor="@color/black"
+        android:textColor="@color/label_primary"
         android:textSize="@dimen/subhead" />
 
     <Spinner
@@ -84,7 +84,7 @@
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
                android:text="@string/deadline"
-               android:textColor="@color/black"
+               android:textColor="@color/label_primary"
                android:textSize="@dimen/subhead" />
 
            <com.google.android.material.switchmaterial.SwitchMaterial
@@ -104,7 +104,7 @@
                android:gravity="center_vertical"
                android:paddingStart="4dp"
                android:text=""
-               android:textColor="@color/black"
+               android:textColor="@color/label_primary"
                android:textSize="@dimen/subhead" />
 
        </LinearLayout>

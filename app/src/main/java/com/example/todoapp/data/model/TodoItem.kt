@@ -10,10 +10,13 @@ data class TodoItem(
     val done: Boolean,
     val creationDate: LocalDateTime,
     val updatedDate: LocalDateTime?
-)
+) {
+
+}
 
 enum class Importance {
-    LOW, MEDIUM, HIGH
+    LOW, MEDIUM, HIGH;
+
 }
 
 fun stringToImportance(importance: String): Importance {
