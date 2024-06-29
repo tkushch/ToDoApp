@@ -19,20 +19,18 @@ import java.time.LocalDateTime
 
 
 class TodoAdapter(
-
-    private val todoItemsRepository: TodoItemsRepository,
-    private val onTasksChangedListener: OnTasksChangeListener,
-    private val onTaskEditListener: OnTaskEditListener
+    private val onTasksChangedListener: OnTaskChangeListener,
+    private val onTaskPressListener: OnTaskPressListener
 ) :
 
     ListAdapter<TodoItem, TodoAdapter.TodoViewHolder>(TodoDiffCallback()) {
 
-    interface OnTasksChangeListener {
-        fun onTasksChanged()
+    interface OnTaskChangeListener {
+        fun onTaskChanged(id: String)
     }
 
-    interface OnTaskEditListener {
-        fun onTaskEdit(id: String)
+    interface OnTaskPressListener {
+        fun onTaskPressed(id: String)
     }
 
 
@@ -44,7 +42,7 @@ class TodoAdapter(
 
     override fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
         val currentItem = getItem(position)
-        holder.bind(currentItem, onTasksChangedListener, onTaskEditListener, todoItemsRepository)
+        holder.bind(currentItem, onTasksChangedListener, onTaskPressListener)
     }
 
 
@@ -56,9 +54,8 @@ class TodoAdapter(
 
         fun bind(
             todoItem: TodoItem,
-            onTasksChangedListener: OnTasksChangeListener,
-            onTaskEditListener: OnTaskEditListener,
-            todoItemsRepository: TodoItemsRepository
+            onTasksChangedListener: OnTaskChangeListener,
+            onTaskPressListener: OnTaskPressListener,
         ) {
             tvTodoText.text = todoItem.text
             checkBox.setOnCheckedChangeListener(null)
@@ -66,14 +63,12 @@ class TodoAdapter(
             updateTextDecoration(tvTodoText, todoItem.done, todoItem.deadline)
 
             checkBox.setOnCheckedChangeListener { _, isChecked ->
-                todoItemsRepository.changeTodoItemDoneStatus(todoItem.id)
                 updateTextDecoration(tvTodoText, isChecked, todoItem.deadline)
-                onTasksChangedListener.onTasksChanged()
-
+                onTasksChangedListener.onTaskChanged(todoItem.id)
             }
 
             editClickArea.setOnClickListener {
-                onTaskEditListener.onTaskEdit(todoItem.id)
+                onTaskPressListener.onTaskPressed(todoItem.id)
             }
 
             when (todoItem.importance) {

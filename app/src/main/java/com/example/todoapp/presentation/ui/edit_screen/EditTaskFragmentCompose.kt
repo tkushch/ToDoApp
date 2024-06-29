@@ -48,6 +48,7 @@ import java.util.Calendar
 import java.util.GregorianCalendar
 import java.util.Locale
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -93,7 +94,9 @@ class EditTaskFragmentCompose : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 AppTheme {
-                    EditTaskScreen(editTaskViewModel) { parentFragmentManager.popBackStack() }
+                    EditTaskScreen(editTaskViewModel) {
+                        parentFragmentManager.popBackStack()
+                        editTaskViewModel.clearData()}
                 }
             }
         }
@@ -116,7 +119,7 @@ class EditTaskFragmentCompose : Fragment() {
 @Composable
 fun previewScreenDark() {
     AppTheme(darkTheme = true) {
-        EditTaskScreen(EditTaskViewModel(), goBack = {})
+        EditTaskScreen( EditTaskViewModel(), goBack = {})
     }
 }
 
@@ -124,7 +127,7 @@ fun previewScreenDark() {
 @Composable
 fun previewScreenLight() {
     AppTheme(darkTheme = false) {
-        EditTaskScreen(EditTaskViewModel(), goBack = {})
+        EditTaskScreen( EditTaskViewModel(), goBack = {})
     }
 }
 
@@ -135,6 +138,7 @@ fun EditTaskScreen(
     vm: EditTaskViewModel = EditTaskViewModel(),
     goBack: () -> Unit = {}
 ) {
+
     val item = vm.todoItem
 
     var text by remember {

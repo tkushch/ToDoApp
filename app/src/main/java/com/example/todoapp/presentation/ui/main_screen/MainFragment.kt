@@ -16,7 +16,7 @@ import androidx.fragment.app.activityViewModels
 import com.example.todoapp.presentation.ui.MainActivity
 import com.example.todoapp.presentation.ui.main_screen.viewmodel.TasksViewModel
 
-class MainFragment : Fragment(), TodoAdapter.OnTasksChangeListener {
+class MainFragment : Fragment(), TodoAdapter.OnTaskChangeListener {
     private val tasksViewModel: TasksViewModel by activityViewModels()
     private var todoAdapter : TodoAdapter? = null
 
@@ -40,7 +40,7 @@ class MainFragment : Fragment(), TodoAdapter.OnTasksChangeListener {
 
         val tasksRecyclerView = view.findViewById<RecyclerView>(R.id.tasksRecyclerView)
         tasksRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        todoAdapter = TodoAdapter(todoItemsRepository, this, requireActivity() as MainActivity)
+        todoAdapter = TodoAdapter( this, requireActivity() as MainActivity)
         tasksRecyclerView.adapter = todoAdapter
         todoAdapter?.submitList(tasksViewModel.currentTasks.value)
         tasksViewModel.currentTasks.observe(viewLifecycleOwner) {
@@ -59,8 +59,8 @@ class MainFragment : Fragment(), TodoAdapter.OnTasksChangeListener {
         button.setImageResource(if (tasksViewModel.showCompletedTasks.value != false) R.drawable.eye_on else R.drawable.eye_off)
     }
 
-    override fun onTasksChanged() {
-        tasksViewModel.updateTasks()
+    override fun onTaskChanged(id: String) {
+        tasksViewModel.changeTaskStatus(id)
         todoAdapter?.submitList(tasksViewModel.currentTasks.value)
     }
 }

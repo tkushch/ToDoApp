@@ -13,7 +13,7 @@ import com.example.todoapp.presentation.ui.edit_screen.EditTaskFragmentCompose
 import com.example.todoapp.presentation.ui.main_screen.MainFragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskEditListener {
+class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskPressListener {
     private lateinit var fab: FloatingActionButton
     private lateinit var todoItemsRepository: TodoItemsRepository
 
@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskEditListener {
 
         fab = findViewById(R.id.fab)
         fab.setOnClickListener {
-            showEditTaskFragment()
+            showEditTaskFragment(null)
         }
 
     }
@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskEditListener {
 
     }
 
-    override fun onTaskEdit(id: String) {
+    override fun onTaskPressed(id: String) {
         showEditTaskFragment(id)
     }
 }
