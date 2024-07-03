@@ -1,20 +1,19 @@
-package com.example.todoapp.presentation.ui.edit_screen.viewmodel
+package com.example.todoapp.presentation.ui.screen.edit_screen.viewmodel
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.todoapp.TodoApp
 import com.example.todoapp.data.model.Importance
 import com.example.todoapp.data.model.TodoItem
-import com.example.todoapp.data.repository.TodoItemsRepository
-import java.time.LocalDateTime
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
-class EditTaskViewModel : ViewModel() {
-    private var todoItemsRepository: TodoItemsRepository? = null
-    fun setTodoItemsRepository(todoItemsRepository: TodoItemsRepository) {
-        this.todoItemsRepository = todoItemsRepository
-    }
+class EditTaskViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val todoItemsRepository = (application as TodoApp).todoItemsRepository
 
     private val handler = CoroutineExceptionHandler { _, exception ->
         Log.e("EditTaskViewModel", exception.toString())
@@ -26,16 +25,16 @@ class EditTaskViewModel : ViewModel() {
     fun saveTask(idArg: String?, text: String, importance: Importance, deadline: LocalDateTime?) {
         viewModelScope.launch(handler) {
             if (idArg != null) {
-                todoItemsRepository?.updateTodoItem(idArg, text, importance, deadline)
+                todoItemsRepository.updateTodoItem(idArg, text, importance, deadline)
             } else {
-                todoItemsRepository?.addTodoItem(text, importance, deadline)
+                todoItemsRepository.addTodoItem(text, importance, deadline)
             }
         }
     }
 
     fun setTodoItem(idArg: String?) {
         _todoItem = if (idArg != null) {
-            todoItemsRepository?.findTodoItemById(idArg)
+            todoItemsRepository.findTodoItemById(idArg)
         } else {
             null
         }
@@ -51,7 +50,7 @@ class EditTaskViewModel : ViewModel() {
     fun deleteTask(idArg: String?) {
         viewModelScope.launch(handler) {
             if (idArg != null) {
-                todoItemsRepository?.removeTodoItemById(idArg)
+                todoItemsRepository.removeTodoItemById(idArg)
             }
         }
     }

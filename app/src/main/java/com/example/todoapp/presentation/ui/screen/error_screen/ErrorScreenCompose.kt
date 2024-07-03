@@ -1,4 +1,4 @@
-package com.example.todoapp.presentation.ui.error_screen
+package com.example.todoapp.presentation.ui.screen.error_screen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize

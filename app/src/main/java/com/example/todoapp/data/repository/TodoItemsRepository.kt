@@ -2,29 +2,44 @@ package com.example.todoapp.data.repository
 
 import com.example.todoapp.data.model.Importance
 import com.example.todoapp.data.model.TodoItem
+import kotlinx.coroutines.CoroutineScope
 import java.time.LocalDateTime
 import java.util.UUID
 
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class TodoItemsRepository {
-    private val todoItems: MutableList<TodoItem> = mutableListOf()
+    private val _todoItems = MutableStateFlow<List<TodoItem>>(emptyList())
+    val todoItems: StateFlow<List<TodoItem>> = _todoItems
+    private val repositoryScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    suspend fun getTodoItems(): List<TodoItem> = withContext(Dispatchers.IO) {
-        todoItems
+    init {
+        repositoryScope.launch {
+            _fillDataHardCode()
+        }
     }
 
-    suspend fun getUncompletedTodoItems(): List<TodoItem> = withContext(Dispatchers.IO) {
-        todoItems.filter { !it.done }
+    val numCompletedTodoItems: StateFlow<Int> = _todoItems.map { items -> items.count { it.done } }
+        .stateIn(repositoryScope, SharingStarted.Lazily, 0)
+
+    val uncompletedTodoItems: StateFlow<List<TodoItem>> =
+        _todoItems.map { items -> items.filter { !it.done } }
+            .stateIn(repositoryScope, SharingStarted.Lazily, emptyList())
+
+    fun findTodoItemById(todoId: String): TodoItem? {
+        return todoItems.value.find { it.id == todoId }
     }
 
-    suspend fun getNumCompletedTodoItems(): Int = withContext(Dispatchers.IO) {
-        todoItems.count { it.done }
-    }
-
-    suspend fun addTodoItem(taskText: String, importance: Importance, deadline: LocalDateTime?) =
+    suspend fun addTodoItem(taskText: String, importance: Importance, deadline: LocalDateTime?) {
         withContext(Dispatchers.IO) {
             val newTask = TodoItem(
                 id = UUID.randomUUID().toString(),
@@ -35,11 +50,14 @@ class TodoItemsRepository {
                 creationDate = LocalDateTime.now(),
                 updatedDate = null
             )
-            todoItems.add(newTask)
+            _todoItems.value += newTask
         }
+    }
 
-    private suspend fun addTodoItem(todoItem: TodoItem) = withContext(Dispatchers.IO) {
-        todoItems.add(todoItem)
+    private suspend fun addTodoItem(todoItem: TodoItem) {
+        withContext(Dispatchers.IO) {
+            _todoItems.value += todoItem
+        }
     }
 
     suspend fun updateTodoItem(
@@ -47,39 +65,47 @@ class TodoItemsRepository {
         text: String,
         importance: Importance,
         deadline: LocalDateTime?
-    ) = withContext(Dispatchers.IO) {
-        val index = todoItems.indexOfFirst { it.id == taskId }
-        if (index != -1) {
-            val oldItem = todoItems[index]
-            val newItem = oldItem.copy(
-                text = text,
-                importance = importance,
-                deadline = deadline,
-                updatedDate = LocalDateTime.now()
-            )
-            todoItems[index] = newItem
+    ) {
+        withContext(Dispatchers.IO) {
+            val updatedList = _todoItems.value.map { item ->
+                if (item.id == taskId) {
+                    item.copy(
+                        text = text,
+                        importance = importance,
+                        deadline = deadline,
+                        updatedDate = LocalDateTime.now()
+                    )
+                } else {
+                    item
+                }
+            }
+            _todoItems.value = updatedList
         }
     }
 
-    suspend fun changeTodoItemDoneStatus(taskId: String) = withContext(Dispatchers.IO) {
-        val index = todoItems.indexOfFirst { it.id == taskId }
-        if (index != -1) {
-            val oldItem = todoItems[index]
-            val newItem = oldItem.copy(done = !oldItem.done)
-            todoItems[index] = newItem
+    suspend fun changeTodoItemDoneStatus(todoId: String) {
+        withContext(Dispatchers.IO) {
+            val updatedList = _todoItems.value.map { item ->
+                if (item.id == todoId) {
+                    item.copy(done = !item.done)
+                } else {
+                    item
+                }
+            }
+            _todoItems.value = updatedList
         }
     }
 
-    fun findTodoItemById(todoid: String): TodoItem? =
-        todoItems.find { it.id == todoid }
-
-    suspend fun removeTodoItemById(todoid: String): Boolean = withContext(Dispatchers.IO) {
-        todoItems.removeIf { it.id == todoid }
+    suspend fun removeTodoItemById(todoId: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            val initialSize = _todoItems.value.size
+            _todoItems.value = _todoItems.value.filter { it.id != todoId }
+            initialSize > _todoItems.value.size
+        }
     }
 
-
-    suspend fun fillDataHardCode() {
-        if (todoItems.isEmpty()) {
+    private suspend fun _fillDataHardCode() {
+        if (_todoItems.value.isEmpty()) {
             withContext(Dispatchers.IO) {
                 addTodoItem(
                     TodoItem(
@@ -92,6 +118,7 @@ class TodoItemsRepository {
                         null
                     )
                 )
+
                 addTodoItem(
                     TodoItem(
                         "1",
@@ -238,4 +265,5 @@ class TodoItemsRepository {
             }
         }
     }
+
 }
