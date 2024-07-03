@@ -1,4 +1,4 @@
-package com.example.todoapp.presentation.ui.adapter
+package com.example.todoapp.presentation.ui.main_screen.adapter
 
 import android.graphics.Color
 import android.graphics.Paint
@@ -19,20 +19,18 @@ import java.time.LocalDateTime
 
 
 class TodoAdapter(
-
-    private val todoItemsRepository: TodoItemsRepository,
-    private val onTasksChangedListener: OnTasksChangeListener,
-    private val onTaskEditListener: OnTaskEditListener
+    private val onTasksChangedListener: OnTaskChangeListener,
+    private val onTaskPressListener: OnTaskPressListener
 ) :
 
     ListAdapter<TodoItem, TodoAdapter.TodoViewHolder>(TodoDiffCallback()) {
 
-    interface OnTasksChangeListener {
-        fun onTasksChanged()
+    interface OnTaskChangeListener {
+        fun onTaskChanged(id: String)
     }
 
-    interface OnTaskEditListener {
-        fun onTaskEdit(id: String)
+    interface OnTaskPressListener {
+        fun onTaskPressed(id: String)
     }
 
 
@@ -43,10 +41,8 @@ class TodoAdapter(
     }
 
     override fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
-
         val currentItem = getItem(position)
-
-        holder.bind(currentItem, onTasksChangedListener, onTaskEditListener, todoItemsRepository)
+        holder.bind(currentItem, onTasksChangedListener, onTaskPressListener)
     }
 
 
@@ -58,26 +54,21 @@ class TodoAdapter(
 
         fun bind(
             todoItem: TodoItem,
-            onTasksChangedListener: OnTasksChangeListener,
-            onTaskEditListener: OnTaskEditListener,
-            todoItemsRepository: TodoItemsRepository
+            onTasksChangedListener: OnTaskChangeListener,
+            onTaskPressListener: OnTaskPressListener,
         ) {
             tvTodoText.text = todoItem.text
             checkBox.setOnCheckedChangeListener(null)
             checkBox.isChecked = todoItem.done
-            updateTextDecoration(tvTodoText, todoItem.done)
+            updateTextDecoration(tvTodoText, todoItem.done, todoItem.deadline)
 
             checkBox.setOnCheckedChangeListener { _, isChecked ->
-                if (checkBox.isChecked != todoItem.done) {
-                    todoItemsRepository.changeTodoItemDoneStatus(todoItem.id)
-
-                    updateTextDecoration(tvTodoText, isChecked)
-                    onTasksChangedListener.onTasksChanged()
-                }
+                updateTextDecoration(tvTodoText, isChecked, todoItem.deadline)
+                onTasksChangedListener.onTaskChanged(todoItem.id)
             }
 
             editClickArea.setOnClickListener {
-                onTaskEditListener.onTaskEdit(todoItem.id)
+                onTaskPressListener.onTaskPressed(todoItem.id)
             }
 
             when (todoItem.importance) {
@@ -96,20 +87,20 @@ class TodoAdapter(
                     tvImportance.setTextColor(Color.RED)
                 }
             }
-
-            if (!todoItem.done && todoItem.deadline != null && todoItem.deadline <= LocalDateTime.now()) {
-                tvTodoText.setTextColor(Color.RED)
-            } else {
-                tvTodoText.setTextColor(Color.BLACK)
-            }
         }
 
 
-        private fun updateTextDecoration(tv: TextView, done: Boolean) {
+        private fun updateTextDecoration(tv: TextView, done: Boolean, deadline: LocalDateTime?) {
             if (done) {
                 tv.paintFlags = tv.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
             } else {
                 tv.paintFlags = tv.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+            }
+
+            if (!done && deadline != null && deadline <= LocalDateTime.now()) {
+                tvTodoText.setTextColor(Color.RED)
+            } else {
+                tvTodoText.setTextColor(Color.BLACK)
             }
         }
     }

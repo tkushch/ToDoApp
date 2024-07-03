@@ -5,6 +5,6 @@ import com.example.todoapp.data.repository.TodoItemsRepository
 
 class TodoApp : Application() {
 
-    val todoItemsRepository: TodoItemsRepository = TodoItemsRepository()
+    val todoItemsRepository by lazy { TodoItemsRepository() }
 
 }

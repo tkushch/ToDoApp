@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".presentation.ui.MainActivity"
-    android:background="@color/overlay"
+    android:background="@color/support_overlay"
     >
 
 
@@ -35,7 +35,7 @@
                 android:id="@+id/textView3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Мои дела"
+                android:text="@string/my_tasks"
                 android:textSize="@dimen/large_title" />
 
             <LinearLayout
@@ -48,7 +48,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/done"
-                    android:textColor="@color/gray"
+                    android:textColor="@color/color_gray"
                     android:textSize="@dimen/subhead" />
 
                 <TextView
@@ -56,7 +56,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/num_example"
-                    android:textColor="@color/gray"
+                    android:textColor="@color/color_gray"
                     android:textSize="@dimen/subhead" />
             </LinearLayout>
 
@@ -66,12 +66,11 @@
         <ImageButton
             android:id="@+id/btn_toggle_visibility"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="bottom"
-            android:layout_margin="10dp"
-            android:layout_weight="1"
-            android:background="@color/overlay"
-            android:backgroundTint="@color/overlay"
+            android:layout_weight="2"
+            android:background="@color/support_overlay"
+            android:backgroundTint="@color/support_overlay"
             android:contentDescription="@string/hide_done_tasks"
             android:src="@drawable/eye_on" />
 

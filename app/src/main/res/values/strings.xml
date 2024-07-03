@@ -13,4 +13,13 @@
     <string name="hide_done_tasks">hide_done_tasks</string>
     <string name="enter_the_task">Введите задачу</string>
     <string name="choose_the_date">Выберите дату</string>
+    <string name="my_tasks">Мои дела</string>
+    <string name="todo_edit_label">Что надо сделать...</string>
+    <string name="todo_priority_low">Низкая</string>
+    <string name="todo_priority_high">Высокая</string>
+    <string name="todo_priority_medium">Средняя</string>
+    <string name="calendar_ok">ГОТОВО</string>
+    <string name="calendar_cancel">ОТМЕНА</string>
+
+    <string name="choose_date_cancel">Выберите будущую дату</string>
 </resources>
