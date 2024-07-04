@@ -1,11 +1,10 @@
 package com.example.todoapp.presentation.ui.screen.main_screen.viewmodel
 
-import android.app.Application
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
-import com.example.todoapp.data.model.TodoItem
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.todoapp.TodoApp
+import com.example.todoapp.data.model.TodoItem
+import com.example.todoapp.data.repository.TodoItemsRepository
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -17,13 +16,17 @@ import kotlinx.coroutines.launch
 
 
 class TasksViewModel(
-    application: Application,
-) : AndroidViewModel(application) {
-
-    private val todoItemsRepository = (application as TodoApp).todoItemsRepository
+    private val todoItemsRepository: TodoItemsRepository,
+) : ViewModel() {
 
     private val handler = CoroutineExceptionHandler { _, exception ->
         Log.e("EditTaskViewModel", exception.toString())
+    }
+
+    init {
+        viewModelScope.launch(handler) {
+            todoItemsRepository.update()
+        }
     }
 
     private val _showCompletedTasks = MutableStateFlow(true)

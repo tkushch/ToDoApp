@@ -1,24 +1,24 @@
-package com.example.todoapp.presentation.ui.screen
+package com.example.todoapp.presentation.ui.screen.model
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.todoapp.data.repository.TodoItemsRepository
 import com.example.todoapp.presentation.ui.screen.edit_screen.viewmodel.EditTaskViewModel
 import com.example.todoapp.presentation.ui.screen.main_screen.viewmodel.TasksViewModel
 
 class TodoViewModelFactory(
-    private val application: Application,
+    private val todoItemsRepository: TodoItemsRepository,
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TasksViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return TasksViewModel(application) as T
+            return TasksViewModel(todoItemsRepository) as T
         }
 
         if  (modelClass.isAssignableFrom(EditTaskViewModel::class.java))  {
             @Suppress("UNCHECKED_CAST")
-            return EditTaskViewModel(application) as T
+            return EditTaskViewModel(todoItemsRepository) as T
         }
 
         throw IllegalArgumentException("Unknown ViewModel class")

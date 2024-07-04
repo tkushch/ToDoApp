@@ -1,20 +1,16 @@
 package com.example.todoapp.presentation.ui.screen.edit_screen.viewmodel
 
-import android.app.Application
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.todoapp.TodoApp
 import com.example.todoapp.data.model.Importance
 import com.example.todoapp.data.model.TodoItem
+import com.example.todoapp.data.repository.TodoItemsRepository
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
-class EditTaskViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val todoItemsRepository = (application as TodoApp).todoItemsRepository
-
+class EditTaskViewModel(private val todoItemsRepository: TodoItemsRepository) : ViewModel() {
     private val handler = CoroutineExceptionHandler { _, exception ->
         Log.e("EditTaskViewModel", exception.toString())
     }
@@ -38,7 +34,8 @@ class EditTaskViewModel(application: Application) : AndroidViewModel(application
         } else {
             null
         }
-        if (this.todoId != idArg || (this.todoId == null && idArg == null)) {
+
+        if (this.todoId != idArg) {
             this.todoId = idArg
             text = _todoItem?.text
             importance = _todoItem?.importance

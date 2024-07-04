@@ -2,6 +2,7 @@ package com.example.todoapp.presentation.ui.screen.main_screen
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,11 +14,15 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.example.todoapp.TodoApp
 import com.example.todoapp.databinding.FragmentMainBinding
 import com.example.todoapp.presentation.ui.MainActivity
-import com.example.todoapp.presentation.ui.screen.TodoViewModelFactory
+import com.example.todoapp.presentation.ui.screen.model.TodoViewModelFactory
 import com.example.todoapp.presentation.ui.screen.main_screen.viewmodel.TasksViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 
 class MainFragment : Fragment(),
@@ -27,7 +32,7 @@ class MainFragment : Fragment(),
     }
 
     private val tasksViewModel: TasksViewModel by viewModels {
-        TodoViewModelFactory(requireActivity().application)
+        TodoViewModelFactory((requireActivity().application as TodoApp).todoItemsRepository)
     }
     private var onFabClickListener: OnFabClickListener? = null
     private var todoAdapter: TodoAdapter? = null
@@ -40,6 +45,7 @@ class MainFragment : Fragment(),
         _binding = FragmentMainBinding.inflate(inflater, container, false)
         return binding.root
     }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
