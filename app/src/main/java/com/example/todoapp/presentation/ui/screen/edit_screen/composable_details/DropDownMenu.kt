@@ -41,9 +41,9 @@ fun DropDownMenu(
                     color = AppTheme.colorScheme.labelPrimary
                 )
             },
-            onClick = { onSelect(Importance.MEDIUM) },
+            onClick = { onSelect(Importance.BASIC) },
             modifier = Modifier.background(AppTheme.colorScheme.backElevated),
-            leadingIcon = { IconBeforeText(priority = Importance.MEDIUM) }
+            leadingIcon = { IconBeforeText(priority = Importance.BASIC) }
         )
         DropdownMenuItem(
             text = {
@@ -52,9 +52,9 @@ fun DropDownMenu(
                     color = AppTheme.colorScheme.colorRed
                 )
             },
-            onClick = { onSelect(Importance.HIGH) },
+            onClick = { onSelect(Importance.IMPORTANT) },
             modifier = Modifier.background(AppTheme.colorScheme.backElevated),
-            leadingIcon = { IconBeforeText(priority = Importance.HIGH) },
+            leadingIcon = { IconBeforeText(priority = Importance.IMPORTANT) },
         )
     }
 }

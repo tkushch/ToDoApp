@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="CustomSnackbar" parent="Widget.MaterialComponents.Snackbar">
+        <item name="android:minHeight">64dp</item>
+    </style>
+</resources>

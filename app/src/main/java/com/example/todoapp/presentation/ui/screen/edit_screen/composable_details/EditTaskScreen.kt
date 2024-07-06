@@ -44,7 +44,7 @@ fun EditTaskScreen(
 
     var priority by remember {
         mutableStateOf(
-            vm?.importance ?: item?.importance ?: Importance.MEDIUM
+            vm?.importance ?: item?.importance ?: Importance.BASIC
         )
     }
 

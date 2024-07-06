@@ -1,3 +1,7 @@
+/**
+ * TodoAdapter - класс адаптер для работы с RecyclerView, включает также TodoViewHolder и TodoDiffCallback
+ */
+
 package com.example.todoapp.presentation.ui.screen.main_screen.adapter
 
 import android.graphics.Color
@@ -57,8 +61,8 @@ class TodoAdapter(
             updateTextDecoration(todoItem.done, todoItem.deadline)
 
             checkBox.setOnCheckedChangeListener { _, isChecked ->
-                updateTextDecoration(isChecked, todoItem.deadline)
                 onTasksChangedListener.onTaskChanged(todoItem.id)
+                updateTextDecoration(isChecked, todoItem.deadline)
             }
 
             editClickArea.setOnClickListener {
@@ -76,12 +80,12 @@ class TodoAdapter(
                     tvImportance.setTextColor(Color.BLACK)
                 }
 
-                Importance.MEDIUM -> {
+                Importance.BASIC -> {
                     tvImportance.text = context.getString(R.string.medium_importance_symbol)
                     tvImportance.setTextColor(Color.BLACK)
                 }
 
-                Importance.HIGH -> {
+                Importance.IMPORTANT -> {
                     tvImportance.text = context.getString(R.string.high_importance_symbol)
                     tvImportance.setTextColor(Color.RED)
                 }
@@ -110,7 +114,7 @@ class TodoAdapter(
         }
 
         override fun areContentsTheSame(oldItem: TodoItem, newItem: TodoItem): Boolean {
-            return oldItem == newItem
+            return oldItem == newItem && oldItem.done == newItem.done
         }
     }
 

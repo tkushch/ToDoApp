@@ -10,15 +10,23 @@ interface TodoApiService {
     @GET("list")
     suspend fun getTodoList(): ListDto
 
-    @GET("list/{id}")
-    suspend fun getTodoItem(@Path("id") id: String): ElementDto
-
     @POST("list")
-    suspend fun addTodoItem(@Body element: AddElementRequestDto): ElementDto
+    suspend fun addTodoItem(
+        @Header("X-Last-Known-Revision") revision: Int,
+        @Body element: AddElementRequestDto,
+    ): ListDto
 
     @PUT("list/{id}")
-    suspend fun updateTodoItem(@Path("id") id: String, @Body element: AddElementRequestDto): ElementDto
+    suspend fun updateTodoItem(
+        @Header("X-Last-Known-Revision") revision: Int,
+        @Path("id") id: String,
+        @Body element: AddElementRequestDto,
+    ): ListDto
 
     @DELETE("list/{id}")
-    suspend fun deleteTodoItem(@Path("id") id: String)
+    suspend fun deleteTodoItem(
+        @Header("X-Last-Known-Revision") revision: Int,
+        @Path("id") id: String,
+    ): ListDto
+
 }

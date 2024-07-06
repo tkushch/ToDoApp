@@ -12,8 +12,8 @@ import com.example.todoapp.presentation.ui.theme.AppTheme
 
 @Preview(showBackground = true)
 @Composable
-fun IconBeforeText(modifier: Modifier = Modifier, priority: Importance = Importance.HIGH) {
-    if (priority == Importance.HIGH) {
+fun IconBeforeText(modifier: Modifier = Modifier, priority: Importance = Importance.IMPORTANT) {
+    if (priority == Importance.IMPORTANT) {
         Icon(
             painterResource(R.drawable.icon_todo_high),
             null,
@@ -22,7 +22,7 @@ fun IconBeforeText(modifier: Modifier = Modifier, priority: Importance = Importa
         )
     }
 
-    if (priority == Importance.MEDIUM) {
+    if (priority == Importance.BASIC) {
         Icon(
             painterResource(R.drawable.icon_todo_medium),
             contentDescription = null,

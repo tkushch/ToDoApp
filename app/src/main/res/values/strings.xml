@@ -26,4 +26,9 @@
     <string name="empty_string" />
     <string name="medium_importance_symbol">!</string>
     <string name="high_importance_symbol">!!</string>
+    <string name="connection_ok">Соединение установлено</string>
+    <string name="connection_bad">Нет соединения с сервером\nДанные могут быть неактуальны</string>
+    <string name="refresh_button">refresh_button</string>
+    <string name="refresh">Обновление</string>
+    <string name="network_error">Не удалось совершить последнюю операцию\nОшибка соединения с сервером</string>
 </resources>

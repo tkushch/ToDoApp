@@ -1,7 +1,13 @@
+/**
+ * ElementDto - класс формата для сетевых запросов связанных с элементом "задача"
+ */
+
 package com.example.todoapp.data.network.dto
 
 import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class ElementDto(
     @SerializedName("id") val id: String,
     @SerializedName("text") val text: String,
@@ -13,3 +19,5 @@ data class ElementDto(
     @SerializedName("changed_at") val changedAt: Long,
     @SerializedName("last_updated_by") val lastUpdatedBy: String
 )
+
+

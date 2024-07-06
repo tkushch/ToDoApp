@@ -1,3 +1,7 @@
+/**
+ * EditTaskFragmentCompose - класс отвечающий за визуальую часть экрана изменения задачи
+ */
+
 package com.example.todoapp.presentation.ui.screen.edit_screen
 
 import android.os.Bundle
@@ -8,14 +12,19 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.todoapp.TodoApp
-import com.example.todoapp.presentation.ui.screen.model.TodoViewModelFactory
+import com.example.todoapp.data.network.connectivity.OnNetworkErrorListener
+import com.example.todoapp.presentation.ui.screen.viewmodelfactory.TodoViewModelFactory
 import com.example.todoapp.presentation.ui.screen.edit_screen.viewmodel.EditTaskViewModel
 import com.example.todoapp.presentation.ui.screen.edit_screen.composable_details.EditTaskScreen
 import com.example.todoapp.presentation.ui.theme.AppTheme
 
 class EditTaskFragmentCompose : Fragment() {
     private val editTaskViewModel: EditTaskViewModel by viewModels {
-        TodoViewModelFactory((requireActivity().application as TodoApp).todoItemsRepository)
+        TodoViewModelFactory(
+            (requireActivity().application as TodoApp).todoItemsRepository,
+            (requireActivity().application as TodoApp).connectivityObserver,
+            requireActivity() as OnNetworkErrorListener
+        )
     }
 
     private var todoId: String? = null
@@ -29,10 +38,13 @@ class EditTaskFragmentCompose : Fragment() {
         val composeView = ComposeView(inflater.context)
         composeView.setContent {
             AppTheme {
-                EditTaskScreen(editTaskViewModel) {
-                    parentFragmentManager.popBackStack()
-                    editTaskViewModel.clearData()
-                }
+                EditTaskScreen(vm = editTaskViewModel,
+                    goBack = {
+                        parentFragmentManager.popBackStack()
+                        editTaskViewModel.clearData()
+                    }
+                )
+
             }
         }
 

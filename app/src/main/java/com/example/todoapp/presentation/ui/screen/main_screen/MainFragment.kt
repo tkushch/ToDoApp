@@ -1,43 +1,52 @@
+/**
+ * MainFragment - класс отвечающий за визуальную часть основного экрана
+ */
+
 package com.example.todoapp.presentation.ui.screen.main_screen
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.todoapp.R
-import com.example.todoapp.presentation.ui.screen.main_screen.adapter.TodoAdapter
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.todoapp.R
 import com.example.todoapp.TodoApp
+import com.example.todoapp.data.network.connectivity.ConnectivityObserver
+import com.example.todoapp.data.network.connectivity.OnNetworkErrorListener
 import com.example.todoapp.databinding.FragmentMainBinding
 import com.example.todoapp.presentation.ui.MainActivity
-import com.example.todoapp.presentation.ui.screen.model.TodoViewModelFactory
+import com.example.todoapp.presentation.ui.screen.main_screen.adapter.TodoAdapter
 import com.example.todoapp.presentation.ui.screen.main_screen.viewmodel.TasksViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
+import com.example.todoapp.presentation.ui.screen.viewmodelfactory.TodoViewModelFactory
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 
-class MainFragment : Fragment(),
-    TodoAdapter.OnTaskChangeListener {
+class MainFragment : Fragment(), TodoAdapter.OnTaskChangeListener {
     interface OnFabClickListener {
         fun onFloatingActionButtonClick()
     }
 
     private val tasksViewModel: TasksViewModel by viewModels {
-        TodoViewModelFactory((requireActivity().application as TodoApp).todoItemsRepository)
+        TodoViewModelFactory(
+            (requireActivity().application as TodoApp).todoItemsRepository,
+            (requireActivity().application as TodoApp).connectivityObserver,
+            requireActivity() as OnNetworkErrorListener
+        )
     }
     private var onFabClickListener: OnFabClickListener? = null
     private var todoAdapter: TodoAdapter? = null
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -56,6 +65,12 @@ class MainFragment : Fragment(),
 
         binding.btnToggleVisibility.setOnClickListener {
             tasksViewModel.toggleShowCompletedTasks()
+        }
+
+        binding.refreshButton.setOnClickListener {
+            tasksViewModel.refreshTasks()
+            todoAdapter?.notifyDataSetChanged() // to ignore "Diff" and correct checkboxes after offline view changes
+            Toast.makeText(requireContext(), getString(R.string.refresh), Toast.LENGTH_SHORT).show()
         }
 
         binding.fab.setOnClickListener {
@@ -81,8 +96,7 @@ class MainFragment : Fragment(),
         lifecycleScope.launch {
             tasksViewModel.showCompletedTasks.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
                 .collect { isVisible ->
-                    binding.btnToggleVisibility
-                        .setImageResource(if (isVisible) R.drawable.eye_on else R.drawable.eye_off)
+                    binding.btnToggleVisibility.setImageResource(if (isVisible) R.drawable.eye_on else R.drawable.eye_off)
                 }
         }
 
@@ -90,7 +104,17 @@ class MainFragment : Fragment(),
             tasksViewModel.currentTasks.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
                 .collect { todoAdapter?.submitList(it) }
         }
+
+        (requireActivity().application as TodoApp).connectivityObserver.observe().onEach {
+            if (it == ConnectivityObserver.Status.Available) {
+                tasksViewModel.refreshTasks()
+                todoAdapter?.notifyDataSetChanged() // to ignore "Diff" and correct checkboxes after offline view changes
+            }
+        }.launchIn(lifecycleScope)
+
+
     }
+
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -109,6 +133,11 @@ class MainFragment : Fragment(),
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onResume() {
+        super.onResume()
+        tasksViewModel.refreshTasks()
     }
 }
 

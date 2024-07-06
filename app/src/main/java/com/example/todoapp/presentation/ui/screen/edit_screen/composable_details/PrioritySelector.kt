@@ -28,14 +28,14 @@ import com.example.todoapp.presentation.ui.theme.AppTheme
 @Preview(showBackground = true)
 @Composable
 fun PrioritySelector(
-    priority: Importance = Importance.MEDIUM,
+    priority: Importance = Importance.BASIC,
     selectPriority: (selected: Importance) -> Unit = {}
 ) {
 
     val priorityText = when (priority) {
         Importance.LOW -> stringResource(R.string.todo_priority_low)
-        Importance.MEDIUM -> stringResource(R.string.todo_priority_medium)
-        Importance.HIGH -> stringResource(R.string.todo_priority_high)
+        Importance.BASIC -> stringResource(R.string.todo_priority_medium)
+        Importance.IMPORTANT -> stringResource(R.string.todo_priority_high)
     }
 
     var expanded by remember { mutableStateOf(false) }

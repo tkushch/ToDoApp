@@ -1,3 +1,6 @@
+/**
+ * EditTaskViewModel - класс VM для связи визуальных элементов и репозитория (экран редактирования задачи)
+ */
 package com.example.todoapp.presentation.ui.screen.edit_screen.viewmodel
 
 import android.util.Log
@@ -5,14 +8,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.todoapp.data.model.Importance
 import com.example.todoapp.data.model.TodoItem
+import com.example.todoapp.data.network.connectivity.ConnectivityObserver
+import com.example.todoapp.data.network.connectivity.OnNetworkErrorListener
 import com.example.todoapp.data.repository.TodoItemsRepository
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
-class EditTaskViewModel(private val todoItemsRepository: TodoItemsRepository) : ViewModel() {
+class EditTaskViewModel(
+    private val todoItemsRepository: TodoItemsRepository,
+    private val onNetworkErrorListener: OnNetworkErrorListener?
+) : ViewModel() {
+
     private val handler = CoroutineExceptionHandler { _, exception ->
-        Log.e("EditTaskViewModel", exception.toString())
+        Log.e("EditTaskViewModel", "Error: ${exception.message}")
+        onNetworkErrorListener?.onNetworkError()
     }
 
     private var _todoItem: TodoItem? = null
