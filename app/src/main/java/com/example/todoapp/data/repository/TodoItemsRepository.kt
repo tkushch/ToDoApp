@@ -1,31 +1,93 @@
+/**
+ * TodoItemsRepository - класс репозитория для работы с задачами.
+ * Является прослойкой между БД (сетевой или локальной) и бизнес-логикой приложения
+ */
+
 package com.example.todoapp.data.repository
+
 
 import com.example.todoapp.data.model.Importance
 import com.example.todoapp.data.model.TodoItem
+import com.example.todoapp.data.network.TodoApiService
+import com.example.todoapp.data.network.mapper.ElementMapper
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.retryWhen
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
+import java.io.IOException
 import java.time.LocalDateTime
 import java.util.UUID
 
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+class TodoItemsRepository(
+    private val todoApiService: TodoApiService,
+    private val coroutineScope: CoroutineScope,
+    private val ioDispatcher: CoroutineDispatcher
+) {
+    private val _todoItems = MutableStateFlow<List<TodoItem>>(emptyList())
+    val todoItems: StateFlow<List<TodoItem>> = _todoItems
+    private var currentRevision: Int = 0
 
-class TodoItemsRepository {
-    private val todoItems: MutableList<TodoItem> = mutableListOf()
+    val numCompletedTodoItems: StateFlow<Int> =
+        _todoItems.map { items -> items.count { it.done } }
+            .stateIn(coroutineScope, SharingStarted.Lazily, 0)
 
-    suspend fun getTodoItems(): List<TodoItem> = withContext(Dispatchers.IO) {
-        todoItems
+    val uncompletedTodoItems: StateFlow<List<TodoItem>> =
+        _todoItems.map { items -> items.filter { !it.done } }
+            .stateIn(coroutineScope, SharingStarted.Lazily, emptyList())
+
+    fun findTodoItemById(todoId: String): TodoItem? {
+        return todoItems.value.find { it.id == todoId }
     }
 
-    suspend fun getUncompletedTodoItems(): List<TodoItem> = withContext(Dispatchers.IO) {
-        todoItems.filter { !it.done }
+    private suspend fun <T> performNetworkRequest(
+        request: suspend () -> T,
+        onSuccess: (T) -> Unit,
+        maxRetries: Long = 3,
+        retryDelay: Long = 1000L
+    ) = flow {
+        val response = request()
+        emit(response)
+    }.retryWhen { cause, attempt ->
+        if (cause is IOException && attempt < maxRetries) {
+            delay(retryDelay)
+            true
+        } else {
+            false
+        }
+    }.collect { response ->
+        onSuccess(response)
     }
 
-    suspend fun getNumCompletedTodoItems(): Int = withContext(Dispatchers.IO) {
-        todoItems.count { it.done }
+
+    suspend fun update() {
+        withContext(coroutineScope.coroutineContext + ioDispatcher) {
+            performNetworkRequest(
+                request = {
+                    todoApiService.getTodoList()
+                },
+                onSuccess = { response ->
+                    _todoItems.value = response.list.map { ElementMapper.fromDto(it) }
+                    currentRevision = response.revision
+                }
+            )
+        }
     }
 
-    suspend fun addTodoItem(taskText: String, importance: Importance, deadline: LocalDateTime?) =
-        withContext(Dispatchers.IO) {
+
+    suspend fun addTodoItem(
+        taskText: String,
+        importance: Importance,
+        deadline: LocalDateTime?
+    ) {
+        withContext(coroutineScope.coroutineContext + ioDispatcher) {
             val newTask = TodoItem(
                 id = UUID.randomUUID().toString(),
                 text = taskText,
@@ -35,11 +97,17 @@ class TodoItemsRepository {
                 creationDate = LocalDateTime.now(),
                 updatedDate = null
             )
-            todoItems.add(newTask)
-        }
 
-    private suspend fun addTodoItem(todoItem: TodoItem) = withContext(Dispatchers.IO) {
-        todoItems.add(todoItem)
+            performNetworkRequest(
+                request = {
+                    todoApiService.addTodoItem(currentRevision, ElementMapper.toAddDto(newTask))
+                },
+                onSuccess = { response ->
+                    _todoItems.value += newTask
+                    currentRevision = response.revision
+                }
+            )
+        }
     }
 
     suspend fun updateTodoItem(
@@ -47,195 +115,81 @@ class TodoItemsRepository {
         text: String,
         importance: Importance,
         deadline: LocalDateTime?
-    ) = withContext(Dispatchers.IO) {
-        val index = todoItems.indexOfFirst { it.id == taskId }
-        if (index != -1) {
-            val oldItem = todoItems[index]
-            val newItem = oldItem.copy(
-                text = text,
-                importance = importance,
-                deadline = deadline,
-                updatedDate = LocalDateTime.now()
-            )
-            todoItems[index] = newItem
-        }
-    }
+    ) {
+        withContext(coroutineScope.coroutineContext + ioDispatcher) {
+            var newTask: TodoItem? = null
+            val updatedList = _todoItems.value.map { item ->
+                if (item.id == taskId) {
+                    newTask = item.copy(
+                        text = text,
+                        importance = importance,
+                        deadline = deadline,
+                        updatedDate = LocalDateTime.now()
+                    )
+                    newTask!!
+                } else {
+                    item
+                }
+            }
 
-    suspend fun changeTodoItemDoneStatus(taskId: String) = withContext(Dispatchers.IO) {
-        val index = todoItems.indexOfFirst { it.id == taskId }
-        if (index != -1) {
-            val oldItem = todoItems[index]
-            val newItem = oldItem.copy(done = !oldItem.done)
-            todoItems[index] = newItem
-        }
-    }
-
-    fun findTodoItemById(todoid: String): TodoItem? =
-        todoItems.find { it.id == todoid }
-
-    suspend fun removeTodoItemById(todoid: String): Boolean = withContext(Dispatchers.IO) {
-        todoItems.removeIf { it.id == todoid }
-    }
-
-
-    suspend fun fillDataHardCode() {
-        if (todoItems.isEmpty()) {
-            withContext(Dispatchers.IO) {
-                addTodoItem(
-                    TodoItem(
-                        "0",
-                        "Attend team meeting 2",
-                        Importance.MEDIUM,
-                        LocalDateTime.now().plusDays(4),
-                        true,
-                        LocalDateTime.now(),
-                        null
-                    )
-                )
-                addTodoItem(
-                    TodoItem(
-                        "1",
-                        "Buy groceriesBuy groceriesBuy groceriesBuy groceriesBuy groceriesBuy groceriesBuy groceriesBuy groceriesBuy groceriesBuy groceriesBuy groceriesBuy groceries",
-                        Importance.LOW,
-                        null,
-                        false,
-                        LocalDateTime.now(),
-                        null
-                    )
-                )
-                addTodoItem(
-                    TodoItem(
-                        "2",
-                        "Complete project report",
-                        Importance.HIGH,
-                        LocalDateTime.now().plusDays(1),
-                        false,
-                        LocalDateTime.now(),
-                        null
-                    )
-                )
-                addTodoItem(
-                    TodoItem(
-                        "3",
-                        "Pay utility bills",
-                        Importance.MEDIUM,
-                        LocalDateTime.now().plusWeeks(1),
-                        false,
-                        LocalDateTime.now(),
-                        null
-                    )
-                )
-                addTodoItem(
-                    TodoItem(
-                        "4",
-                        "Book doctor appointment",
-                        Importance.HIGH,
-                        LocalDateTime.now().plusDays(3),
-                        true,
-                        LocalDateTime.now().minusDays(10),
-                        LocalDateTime.now().minusDays(2)
-                    )
-                )
-                addTodoItem(
-                    TodoItem(
-                        "5",
-                        "Clean the house",
-                        Importance.LOW,
-                        null,
-                        true,
-                        LocalDateTime.now().minusDays(5),
-                        LocalDateTime.now().minusDays(1)
-                    )
-                )
-                addTodoItem(
-                    TodoItem(
-                        "6",
-                        "Attend team meeting",
-                        Importance.MEDIUM,
-                        LocalDateTime.now().plusDays(2),
-                        false,
-                        LocalDateTime.now(),
-                        null
-                    )
-                )
-                addTodoItem(
-                    TodoItem(
-                        "7",
-                        "Renew car insurance Renew car insurance Renew car insurance Renew car insurance Renew car insurance Renew car insurance Renew car insurance Renew car insurance Renew car insurance",
-                        Importance.HIGH,
-                        LocalDateTime.now().plusMonths(1),
-                        false,
-                        LocalDateTime.now(),
-                        null
-                    )
-                )
-                addTodoItem(
-                    TodoItem(
-                        "8",
-                        "Read a book",
-                        Importance.LOW,
-                        null,
-                        false,
-                        LocalDateTime.now(),
-                        null
-                    )
-                )
-                addTodoItem(
-                    TodoItem(
-                        "9",
-                        "Exercise",
-                        Importance.MEDIUM,
-                        null,
-                        true,
-                        LocalDateTime.now().minusDays(7),
-                        LocalDateTime.now().minusDays(1)
-                    )
-                )
-                addTodoItem(
-                    TodoItem(
-                        "10",
-                        "Plan vacation",
-                        Importance.LOW,
-                        LocalDateTime.now().plusMonths(3),
-                        false,
-                        LocalDateTime.now(),
-                        null
-                    )
-                )
-                addTodoItem(
-                    TodoItem(
-                        "11",
-                        "Prepare for presentation",
-                        Importance.HIGH,
-                        LocalDateTime.now().plusDays(5),
-                        false,
-                        LocalDateTime.now(),
-                        null
-                    )
-                )
-                addTodoItem(
-                    TodoItem(
-                        "12",
-                        "Organize workspace",
-                        Importance.MEDIUM,
-                        LocalDateTime.now().plusDays(10),
-                        false,
-                        LocalDateTime.now(),
-                        null
-                    )
-                )
-                addTodoItem(
-                    TodoItem(
-                        "13",
-                        "Buy groceries 2",
-                        Importance.HIGH,
-                        null,
-                        false,
-                        LocalDateTime.now(),
-                        null
-                    )
+            if (newTask != null) {
+                performNetworkRequest(
+                    request = {
+                        todoApiService.updateTodoItem(
+                            currentRevision,
+                            taskId,
+                            ElementMapper.toAddDto(newTask!!)
+                        )
+                    },
+                    onSuccess = { response ->
+                        _todoItems.value = updatedList
+                        currentRevision = response.revision
+                    }
                 )
             }
+        }
+    }
+
+    suspend fun changeTodoItemDoneStatus(todoId: String) {
+        withContext(coroutineScope.coroutineContext + ioDispatcher) {
+            var newTask: TodoItem? = null
+            val updatedList = _todoItems.value.map { item ->
+                if (item.id == todoId) {
+                    newTask = item.copy(done = !item.done)
+                    newTask!!
+                } else {
+                    item
+                }
+            }
+            if (newTask != null) {
+                performNetworkRequest(
+                    request = {
+                        todoApiService.updateTodoItem(
+                            currentRevision,
+                            todoId,
+                            ElementMapper.toAddDto(newTask!!)
+                        )
+                    },
+                    onSuccess = { response ->
+                        _todoItems.value = updatedList
+                        currentRevision = response.revision
+                    }
+                )
+            }
+        }
+    }
+
+    suspend fun removeTodoItemById(todoId: String) {
+        withContext(coroutineScope.coroutineContext + ioDispatcher) {
+            performNetworkRequest(
+                request = {
+                    todoApiService.deleteTodoItem(currentRevision, todoId)
+                },
+                onSuccess = { response ->
+                    _todoItems.value = _todoItems.value.filter { it.id != todoId }
+                    currentRevision = response.revision
+                }
+            )
         }
     }
 }

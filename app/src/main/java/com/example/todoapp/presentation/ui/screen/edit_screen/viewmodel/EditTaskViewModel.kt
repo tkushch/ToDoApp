@@ -1,23 +1,28 @@
-package com.example.todoapp.presentation.ui.edit_screen.viewmodel
+/**
+ * EditTaskViewModel - класс VM для связи визуальных элементов и репозитория (экран редактирования задачи)
+ */
+package com.example.todoapp.presentation.ui.screen.edit_screen.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.todoapp.data.model.Importance
 import com.example.todoapp.data.model.TodoItem
+import com.example.todoapp.data.network.connectivity.ConnectivityObserver
+import com.example.todoapp.data.network.connectivity.OnNetworkErrorListener
 import com.example.todoapp.data.repository.TodoItemsRepository
-import java.time.LocalDateTime
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
-class EditTaskViewModel : ViewModel() {
-    private var todoItemsRepository: TodoItemsRepository? = null
-    fun setTodoItemsRepository(todoItemsRepository: TodoItemsRepository) {
-        this.todoItemsRepository = todoItemsRepository
-    }
+class EditTaskViewModel(
+    private val todoItemsRepository: TodoItemsRepository,
+    private val onNetworkErrorListener: OnNetworkErrorListener?
+) : ViewModel() {
 
     private val handler = CoroutineExceptionHandler { _, exception ->
-        Log.e("EditTaskViewModel", exception.toString())
+        Log.e("EditTaskViewModel", "Error: ${exception.message}")
+        onNetworkErrorListener?.onNetworkError()
     }
 
     private var _todoItem: TodoItem? = null
@@ -26,20 +31,21 @@ class EditTaskViewModel : ViewModel() {
     fun saveTask(idArg: String?, text: String, importance: Importance, deadline: LocalDateTime?) {
         viewModelScope.launch(handler) {
             if (idArg != null) {
-                todoItemsRepository?.updateTodoItem(idArg, text, importance, deadline)
+                todoItemsRepository.updateTodoItem(idArg, text, importance, deadline)
             } else {
-                todoItemsRepository?.addTodoItem(text, importance, deadline)
+                todoItemsRepository.addTodoItem(text, importance, deadline)
             }
         }
     }
 
     fun setTodoItem(idArg: String?) {
         _todoItem = if (idArg != null) {
-            todoItemsRepository?.findTodoItemById(idArg)
+            todoItemsRepository.findTodoItemById(idArg)
         } else {
             null
         }
-        if (this.todoId != idArg || (this.todoId == null && idArg == null)) {
+
+        if (this.todoId != idArg) {
             this.todoId = idArg
             text = _todoItem?.text
             importance = _todoItem?.importance
@@ -51,7 +57,7 @@ class EditTaskViewModel : ViewModel() {
     fun deleteTask(idArg: String?) {
         viewModelScope.launch(handler) {
             if (idArg != null) {
-                todoItemsRepository?.removeTodoItemById(idArg)
+                todoItemsRepository.removeTodoItemById(idArg)
             }
         }
     }

@@ -14,7 +14,7 @@
     <string name="enter_the_task">Введите задачу</string>
     <string name="choose_the_date">Выберите дату</string>
     <string name="my_tasks">Мои дела</string>
-    <string name="todo_edit_label">Что надо сделать...</string>
+    <string name="todo_edit_label">Что надо сделать…</string>
     <string name="todo_priority_low">Низкая</string>
     <string name="todo_priority_high">Высокая</string>
     <string name="todo_priority_medium">Средняя</string>
@@ -22,4 +22,13 @@
     <string name="calendar_cancel">ОТМЕНА</string>
 
     <string name="choose_date_cancel">Выберите будущую дату</string>
+    <string name="add_task_button_description">add_task_button</string>
+    <string name="empty_string" />
+    <string name="medium_importance_symbol">!</string>
+    <string name="high_importance_symbol">!!</string>
+    <string name="connection_ok">Соединение установлено</string>
+    <string name="connection_bad">Нет соединения с сервером\nДанные могут быть неактуальны</string>
+    <string name="refresh_button">refresh_button</string>
+    <string name="refresh">Обновление</string>
+    <string name="network_error">Не удалось совершить последнюю операцию\nОшибка соединения с сервером</string>
 </resources>

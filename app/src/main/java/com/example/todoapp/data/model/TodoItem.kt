@@ -1,3 +1,9 @@
+/**
+ * TodoItem - модель для хранения "задач"
+ */
+
+
+
 package com.example.todoapp.data.model
 
 import java.time.LocalDateTime
@@ -10,21 +16,22 @@ data class TodoItem(
     val done: Boolean,
     val creationDate: LocalDateTime,
     val updatedDate: LocalDateTime?
-) {
+)
 
-}
-
+/**
+ * Importance - модель для хранения приоритета "задач"
+ */
 enum class Importance {
-    LOW, MEDIUM, HIGH;
+    LOW, BASIC, IMPORTANT;
 
 }
 
 fun stringToImportance(importance: String): Importance {
     return when (importance) {
-        "Low" -> Importance.LOW
-        "Medium" -> Importance.MEDIUM
-        "High" -> Importance.HIGH
-        else -> Importance.MEDIUM
+        "low" -> Importance.LOW
+        "basic" -> Importance.BASIC
+        "important" -> Importance.IMPORTANT
+        else -> Importance.BASIC
     }
 }
 
