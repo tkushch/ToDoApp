@@ -17,15 +17,13 @@ import com.example.todoapp.presentation.ui.screen.viewmodelfactory.TodoViewModel
 import com.example.todoapp.presentation.ui.screen.edit_screen.viewmodel.EditTaskViewModel
 import com.example.todoapp.presentation.ui.screen.edit_screen.composable_details.EditTaskScreen
 import com.example.todoapp.presentation.ui.theme.AppTheme
+import javax.inject.Inject
 
 class EditTaskFragmentCompose : Fragment() {
-    private val editTaskViewModel: EditTaskViewModel by viewModels {
-        TodoViewModelFactory(
-            (requireActivity().application as TodoApp).todoItemsRepository,
-            (requireActivity().application as TodoApp).connectivityObserver,
-            requireActivity() as OnNetworkErrorListener
-        )
-    }
+
+    @Inject
+    lateinit var viewModelFactory: TodoViewModelFactory
+    private val editTaskViewModel: EditTaskViewModel by viewModels { viewModelFactory }
 
     private var todoId: String? = null
 

@@ -21,6 +21,7 @@ import com.example.todoapp.TodoApp
 import com.example.todoapp.data.network.connectivity.ConnectivityObserver
 import com.example.todoapp.data.network.connectivity.OnNetworkErrorListener
 import com.example.todoapp.databinding.FragmentMainBinding
+import com.example.todoapp.di.FragmentComponent
 import com.example.todoapp.presentation.ui.MainActivity
 import com.example.todoapp.presentation.ui.screen.main_screen.adapter.TodoAdapter
 import com.example.todoapp.presentation.ui.screen.main_screen.viewmodel.TasksViewModel
@@ -28,6 +29,7 @@ import com.example.todoapp.presentation.ui.screen.viewmodelfactory.TodoViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
 class MainFragment : Fragment(), TodoAdapter.OnTaskChangeListener {
@@ -35,18 +37,25 @@ class MainFragment : Fragment(), TodoAdapter.OnTaskChangeListener {
         fun onFloatingActionButtonClick()
     }
 
-    private val tasksViewModel: TasksViewModel by viewModels {
-        TodoViewModelFactory(
-            (requireActivity().application as TodoApp).todoItemsRepository,
-            (requireActivity().application as TodoApp).connectivityObserver,
-            requireActivity() as OnNetworkErrorListener
-        )
-    }
+
+    @Inject
+    lateinit var viewModelFactory: TodoViewModelFactory
+
+    @Inject
+    lateinit var connectivityObserver: ConnectivityObserver
+
+    private val tasksViewModel: TasksViewModel by viewModels { viewModelFactory }
     private var onFabClickListener: OnFabClickListener? = null
     private var todoAdapter: TodoAdapter? = null
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
 
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        (requireContext() as MainActivity).activityComponent.fragmentComponentFactory().create()
+            .inject(this)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -105,7 +114,7 @@ class MainFragment : Fragment(), TodoAdapter.OnTaskChangeListener {
                 .collect { todoAdapter?.submitList(it) }
         }
 
-        (requireActivity().application as TodoApp).connectivityObserver.observe().onEach {
+        connectivityObserver.observe().onEach {
             if (it == ConnectivityObserver.Status.Available) {
                 tasksViewModel.refreshTasks()
                 todoAdapter?.notifyDataSetChanged() // to ignore "Diff" and correct checkboxes after offline view changes

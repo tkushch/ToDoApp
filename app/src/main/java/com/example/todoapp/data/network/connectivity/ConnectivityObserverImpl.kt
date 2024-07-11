@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 
-class NetworkConnectivityObserver(
+class ConnectivityObserverImpl(
     context: Context
 ) : ConnectivityObserver {
     private val connectivityManager =
@@ -52,7 +52,7 @@ class NetworkConnectivityObserver(
         }.distinctUntilChanged()
     }
 
-    fun checkCurrentStatus(): ConnectivityObserver.Status {
+    override fun checkCurrentStatus(): ConnectivityObserver.Status {
         val network = connectivityManager.activeNetwork ?: return ConnectivityObserver.Status.Unavailable
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return ConnectivityObserver.Status.Unavailable
         return when {

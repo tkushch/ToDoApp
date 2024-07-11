@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     kotlin("plugin.serialization")
+    id("kotlin-kapt")
 }
 
 
@@ -50,7 +51,14 @@ android {
 
 }
 
+val daggerVersion = "2.51.1"
+val dagger = "com.google.dagger:dagger:$daggerVersion"
+val daggerCompiler = "com.google.dagger:dagger-compiler:$daggerVersion"
+
 dependencies {
+    implementation(dagger)
+    kapt(daggerCompiler)
+
     implementation("androidx.core:core-ktx:1.13.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
@@ -81,8 +89,4 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("androidx.work:work-runtime-ktx:2.9.0")
-
-
-
-
 }

@@ -16,21 +16,32 @@ import com.example.todoapp.data.network.background.schedulePeriodicWork
 import com.example.todoapp.data.network.connectivity.ConnectivityObserver
 import com.example.todoapp.data.network.connectivity.OnNetworkErrorListener
 import com.example.todoapp.databinding.ActivityMainBinding
+import com.example.todoapp.di.ActivityComponent
 import com.example.todoapp.presentation.ui.screen.edit_screen.EditTaskFragmentCompose
 import com.example.todoapp.presentation.ui.screen.main_screen.MainFragment
 import com.example.todoapp.presentation.ui.screen.main_screen.adapter.TodoAdapter
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskPressListener,
     MainFragment.OnFabClickListener, OnNetworkErrorListener {
+
+    @Inject
+    lateinit var connectivityObserver: ConnectivityObserver
+    lateinit var activityComponent: ActivityComponent
+
     private lateinit var binding: ActivityMainBinding
     private var previousStatus: ConnectivityObserver.Status = ConnectivityObserver.Status.Available
     private var isShowingSnackbar = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        (application as TodoApp).appComponent.activityComponentFactory().create(this).also{
+            activityComponent = it
+            it.inject(this)
+        }
         schedulePeriodicWork(applicationContext)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -42,11 +53,11 @@ class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskPressListener,
             }
         }
 
-        (application as TodoApp).connectivityObserver.observe().onEach {
+        connectivityObserver.observe().onEach {
             handleConnectivityStatus(it)
         }.launchIn(lifecycleScope)
 
-        handleConnectivityStatus((application as TodoApp).connectivityObserver.checkCurrentStatus())
+        handleConnectivityStatus(connectivityObserver.checkCurrentStatus())
     }
 
     private fun showEditTaskFragment(taskId: String? = null) {
