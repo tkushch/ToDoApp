@@ -18,10 +18,9 @@ import javax.inject.Singleton
 
 
 @Singleton
-@Component(modules = [AppModule::class, NetworkModule::class, RepositoryModule::class, ConnectivityModule::class])
+@Component( modules = [AppModule::class, NetworkModule::class, RepositoryModule::class, ConnectivityModule::class])
 interface AppComponent {
     fun inject(application: TodoApp)
-
     fun activityComponentFactory(): ActivityComponent.Factory
 
     @Component.Factory

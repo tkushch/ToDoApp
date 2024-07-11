@@ -37,7 +37,6 @@ class MainFragment : Fragment(), TodoAdapter.OnTaskChangeListener {
         fun onFloatingActionButtonClick()
     }
 
-
     @Inject
     lateinit var viewModelFactory: TodoViewModelFactory
 
@@ -51,12 +50,6 @@ class MainFragment : Fragment(), TodoAdapter.OnTaskChangeListener {
     private val binding get() = _binding!!
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        (requireContext() as MainActivity).activityComponent.fragmentComponentFactory().create()
-            .inject(this)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -67,6 +60,9 @@ class MainFragment : Fragment(), TodoAdapter.OnTaskChangeListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        (requireContext() as MainActivity).activityComponent.fragmentComponentFactory().create()
+            .inject(this)
 
         binding.tasksRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         todoAdapter = TodoAdapter(this, requireActivity() as MainActivity)
@@ -114,14 +110,19 @@ class MainFragment : Fragment(), TodoAdapter.OnTaskChangeListener {
                 .collect { todoAdapter?.submitList(it) }
         }
 
+        lifecycleScope.launch {
+            tasksViewModel.networkErrors.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .collect { errorMessage ->
+                    (requireActivity() as OnNetworkErrorListener).onNetworkError(errorMessage)
+                }
+        }
+
         connectivityObserver.observe().onEach {
             if (it == ConnectivityObserver.Status.Available) {
                 tasksViewModel.refreshTasks()
                 todoAdapter?.notifyDataSetChanged() // to ignore "Diff" and correct checkboxes after offline view changes
             }
         }.launchIn(lifecycleScope)
-
-
     }
 
 

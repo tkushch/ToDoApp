@@ -7,6 +7,7 @@
 package com.example.todoapp.presentation.ui
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
@@ -38,10 +39,13 @@ class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskPressListener,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        (application as TodoApp).appComponent.activityComponentFactory().create(this).also{
+        (application as TodoApp).appComponent.activityComponentFactory().create(this).also {
             activityComponent = it
             it.inject(this)
         }
+
+
+
         schedulePeriodicWork(applicationContext)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -90,7 +94,7 @@ class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskPressListener,
         previousStatus = currentStatus
     }
 
-    override fun onNetworkError() {
+    override fun onNetworkError(message: String) {
         if (!isShowingSnackbar) {
             Snackbar.make(binding.root, getString(R.string.network_error), Snackbar.LENGTH_SHORT)
                 .addCallback(object : Snackbar.Callback() {
