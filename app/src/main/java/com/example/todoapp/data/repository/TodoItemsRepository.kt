@@ -1,6 +1,7 @@
 package com.example.todoapp.data.repository
 
 
+import android.content.SharedPreferences
 import android.util.Log
 import com.example.todoapp.data.db.TodoItemDao
 import com.example.todoapp.data.db.toDomainModel
@@ -34,10 +35,11 @@ class TodoItemsRepository(
     private val todoItemDao: TodoItemDao,
     private val coroutineScope: CoroutineScope,
     private val ioDispatcher: CoroutineDispatcher,
+    sharedPreferences: SharedPreferences,
 ) {
     private val _todoItems = MutableStateFlow<List<TodoItem>>(emptyList())
     val todoItems: StateFlow<List<TodoItem>> = _todoItems
-    private var currentRevision: Int = 0
+    private val _currentRevision = MutableStateFlow(sharedPreferences.getInt("revision", 0))
 
     val numCompletedTodoItems: StateFlow<Int> = _todoItems.map { items -> items.count { it.done } }
         .stateIn(coroutineScope, SharingStarted.Lazily, 0)
@@ -48,6 +50,16 @@ class TodoItemsRepository(
 
     fun findTodoItemById(todoId: String): TodoItem? {
         return todoItems.value.find { it.id == todoId }
+    }
+
+    private val editor = sharedPreferences.edit()
+
+    init {
+        coroutineScope.launch {
+            _currentRevision.collect {
+                editor.putInt("revision", it).apply()
+            }
+        }
     }
 
     private suspend fun <T> performNetworkRequest(
@@ -74,21 +86,21 @@ class TodoItemsRepository(
         withContext(coroutineScope.coroutineContext + ioDispatcher) {
             _todoItems.value = todoItemDao.getTodoItems().map { it.toDomainModel() }
             val response = todoApiService.getTodoList()
-            Log.d("REPO", "curr $currentRevision serv: ${response.revision}")
-            if (_todoItems.value.isNotEmpty() && currentRevision == response.revision) {
+            Log.d("REPO", "current ${_currentRevision.value} serv: ${response.revision}")
+            if (_todoItems.value.isNotEmpty() && _currentRevision.value == response.revision) {
                 Log.d("REPO", "patch")
-                currentRevision = response.revision
+                _currentRevision.value = response.revision
                 val list = _todoItems.value.map { ElementMapper.toDto(it) }
                 val responsePatch = todoApiService.patchTodoList(
-                    currentRevision, ElementMapper.toListDto(list, currentRevision)
+                    _currentRevision.value, ElementMapper.toListDto(list, _currentRevision.value)
                 )
-                currentRevision = responsePatch.revision
+                _currentRevision.value = responsePatch.revision
                 val newList = responsePatch.list.map { ElementMapper.fromDto(it) }
                 _todoItems.value = newList
                 updateDataBase(newList)
             } else {
                 Log.d("REPO", "from server")
-                currentRevision = response.revision
+                _currentRevision.value = response.revision
                 val newList = response.list.map { ElementMapper.fromDto(it) }
                 _todoItems.value = newList
                 updateDataBase(newList)
@@ -120,9 +132,9 @@ class TodoItemsRepository(
             todoItemDao.insertTodoItem(newTask.toEntity())
             _todoItems.value += newTask
             performNetworkRequest(request = {
-                todoApiService.addTodoItem(currentRevision, ElementMapper.toAddDto(newTask))
+                todoApiService.addTodoItem(_currentRevision.value, ElementMapper.toAddDto(newTask))
             }, onSuccess = { response ->
-                currentRevision = response.revision
+                _currentRevision.value = response.revision
             })
         }
     }
@@ -151,10 +163,10 @@ class TodoItemsRepository(
                 _todoItems.value = updatedList
                 performNetworkRequest(request = {
                     todoApiService.updateTodoItem(
-                        currentRevision, taskId, ElementMapper.toAddDto(newTask!!)
+                        _currentRevision.value, taskId, ElementMapper.toAddDto(newTask!!)
                     )
                 }, onSuccess = { response ->
-                    currentRevision = response.revision
+                    _currentRevision.value = response.revision
                 })
             }
         }
@@ -178,10 +190,10 @@ class TodoItemsRepository(
                 _todoItems.value = updatedList
                 performNetworkRequest(request = {
                     todoApiService.updateTodoItem(
-                        currentRevision, todoId, ElementMapper.toAddDto(task!!)
+                        _currentRevision.value, todoId, ElementMapper.toAddDto(task!!)
                     )
                 }, onSuccess = { response ->
-                    currentRevision = response.revision
+                    _currentRevision.value = response.revision
                 })
             }
         }
@@ -198,9 +210,9 @@ class TodoItemsRepository(
                 }
                 performNetworkRequest(request = {
                     todoApiService.deleteTodoItem(
-                        currentRevision, todoId
+                        _currentRevision.value, todoId
                     )
-                }, onSuccess = { response -> currentRevision = response.revision })
+                }, onSuccess = { response -> _currentRevision.value = response.revision })
             }
         }
     }

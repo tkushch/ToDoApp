@@ -2,6 +2,7 @@ package com.example.todoapp.di
 
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.room.Room
 import com.example.todoapp.data.db.TodoDatabase
 import com.example.todoapp.data.db.TodoItemDao
@@ -21,7 +22,7 @@ import javax.inject.Singleton
 
 
 @Singleton
-@Component(modules = [AppModule::class, NetworkModule::class, RepositoryModule::class, ConnectivityModule::class, DatabaseModule::class])
+@Component(modules = [AppModule::class, NetworkModule::class, RepositoryModule::class, ConnectivityModule::class, DatabaseModule::class, SharedPreferencesModule::class])
 interface AppComponent {
     fun inject(application: UpdateWorker)
     fun activityComponentFactory(): ActivityComponent.Factory
@@ -59,12 +60,14 @@ object RepositoryModule {
         todoApiService: TodoApiService,
         todoItemDao: TodoItemDao,
         applicationScope: CoroutineScope,
+        sharedPreferences: SharedPreferences
     ): TodoItemsRepository {
         return TodoItemsRepository(
             todoApiService,
             todoItemDao,
             applicationScope,
             Dispatchers.IO,
+            sharedPreferences,
         )
     }
 }
@@ -100,5 +103,14 @@ object DatabaseModule {
     @Singleton
     fun provideTodoItemDao(database: TodoDatabase): TodoItemDao {
         return database.dao
+    }
+}
+
+@Module
+object SharedPreferencesModule {
+    @Provides
+    @Singleton
+    fun provideSharedPreferences(context: Context): SharedPreferences {
+        return context.getSharedPreferences("todo_app_prefs", Context.MODE_PRIVATE)
     }
 }
