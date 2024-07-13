@@ -2,9 +2,12 @@ package com.example.todoapp.di
 
 import android.app.Application
 import android.content.Context
-import com.example.todoapp.TodoApp
+import androidx.room.Room
+import com.example.todoapp.data.db.TodoDatabase
+import com.example.todoapp.data.db.TodoItemDao
 import com.example.todoapp.data.network.RetrofitClient
 import com.example.todoapp.data.network.TodoApiService
+import com.example.todoapp.data.network.background.UpdateWorker
 import com.example.todoapp.data.network.connectivity.ConnectivityObserver
 import com.example.todoapp.data.network.connectivity.ConnectivityObserverImpl
 import com.example.todoapp.data.repository.TodoItemsRepository
@@ -18,9 +21,9 @@ import javax.inject.Singleton
 
 
 @Singleton
-@Component( modules = [AppModule::class, NetworkModule::class, RepositoryModule::class, ConnectivityModule::class])
+@Component(modules = [AppModule::class, NetworkModule::class, RepositoryModule::class, ConnectivityModule::class, DatabaseModule::class])
 interface AppComponent {
-    fun inject(application: TodoApp)
+    fun inject(application: UpdateWorker)
     fun activityComponentFactory(): ActivityComponent.Factory
 
     @Component.Factory
@@ -28,7 +31,6 @@ interface AppComponent {
         fun create(@BindsInstance application: Application): AppComponent
     }
 }
-
 
 
 @Module
@@ -55,12 +57,14 @@ object RepositoryModule {
     @Singleton
     fun provideTodoItemsRepository(
         todoApiService: TodoApiService,
-        applicationScope: CoroutineScope
+        todoItemDao: TodoItemDao,
+        applicationScope: CoroutineScope,
     ): TodoItemsRepository {
         return TodoItemsRepository(
             todoApiService,
+            todoItemDao,
             applicationScope,
-            Dispatchers.IO
+            Dispatchers.IO,
         )
     }
 }
@@ -80,4 +84,21 @@ object ConnectivityModule {
     }
 }
 
+@Module
+object DatabaseModule {
+    @Provides
+    @Singleton
+    fun provideDatabase(context: Context): TodoDatabase {
+        return Room.databaseBuilder(
+            context = context,
+            klass = TodoDatabase::class.java,
+            name = "todo_database"
+        ).build()
+    }
 
+    @Provides
+    @Singleton
+    fun provideTodoItemDao(database: TodoDatabase): TodoItemDao {
+        return database.dao
+    }
+}

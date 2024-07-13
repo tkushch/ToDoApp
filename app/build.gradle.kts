@@ -5,7 +5,6 @@ plugins {
     id("kotlin-kapt")
 }
 
-
 android {
     namespace = "com.example.todoapp"
     compileSdk = 34
@@ -52,13 +51,20 @@ android {
 
 }
 
-val daggerVersion = "2.51.1"
-val dagger = "com.google.dagger:dagger:$daggerVersion"
-val daggerCompiler = "com.google.dagger:dagger-compiler:$daggerVersion"
+
 
 dependencies {
+    val daggerVersion = "2.51.1"
+    val dagger = "com.google.dagger:dagger:$daggerVersion"
+    val daggerCompiler = "com.google.dagger:dagger-compiler:$daggerVersion"
     implementation(dagger)
     kapt(daggerCompiler)
+
+    //room
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
 
     implementation("androidx.core:core-ktx:1.13.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -72,11 +78,7 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     implementation("androidx.fragment:fragment-ktx:1.4.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
-    //room
-//    val roomVersion = "2.6.1"
-//    implementation("androidx.room:room-ktx:$roomVersion")
-//    implementation("androidx.room:room-runtime:$roomVersion")
-//    kapt("androidx.room:room-compiler:$roomVersion")
+
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.compose.ui:ui-tooling:1.6.8")
     implementation("androidx.compose.ui:ui-tooling-preview:1.6.8")

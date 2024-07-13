@@ -53,12 +53,10 @@ class EditTaskFragmentCompose : Fragment() {
         val composeView = ComposeView(inflater.context)
         composeView.setContent {
             AppTheme {
-                EditTaskScreen(vm = editTaskViewModel,
-                    goBack = {
-                        parentFragmentManager.popBackStack()
-                        editTaskViewModel.clearData()
-                    }
-                )
+                EditTaskScreen(vm = editTaskViewModel, goBack = {
+                    parentFragmentManager.popBackStack()
+                    editTaskViewModel.clearData()
+                })
 
             }
         }

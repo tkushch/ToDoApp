@@ -1,7 +1,3 @@
-/**
- * MainFragment - класс отвечающий за визуальную часть основного экрана
- */
-
 package com.example.todoapp.presentation.ui.screen.main_screen
 
 import android.content.Context
@@ -17,11 +13,9 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.todoapp.R
-import com.example.todoapp.TodoApp
 import com.example.todoapp.data.network.connectivity.ConnectivityObserver
 import com.example.todoapp.data.network.connectivity.OnNetworkErrorListener
 import com.example.todoapp.databinding.FragmentMainBinding
-import com.example.todoapp.di.FragmentComponent
 import com.example.todoapp.presentation.ui.MainActivity
 import com.example.todoapp.presentation.ui.screen.main_screen.adapter.TodoAdapter
 import com.example.todoapp.presentation.ui.screen.main_screen.viewmodel.TasksViewModel
@@ -31,7 +25,9 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
+/**
+ * MainFragment - класс отвечающий за визуальную часть основного экрана
+ */
 class MainFragment : Fragment(), TodoAdapter.OnTaskChangeListener {
     interface OnFabClickListener {
         fun onFloatingActionButtonClick()

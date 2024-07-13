@@ -1,6 +1,3 @@
-/**
- * EditTaskViewModel - класс VM для связи визуальных элементов и репозитория (экран редактирования задачи)
- */
 package com.example.todoapp.presentation.ui.screen.edit_screen.viewmodel
 
 import android.util.Log
@@ -14,9 +11,11 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
-import javax.inject.Inject
 
-class EditTaskViewModel @Inject constructor(
+/**
+ * EditTaskViewModel - класс VM для связи визуальных элементов и репозитория (экран редактирования задачи)
+ */
+class EditTaskViewModel(
     private val todoItemsRepository: TodoItemsRepository,
 ) : ViewModel() {
 

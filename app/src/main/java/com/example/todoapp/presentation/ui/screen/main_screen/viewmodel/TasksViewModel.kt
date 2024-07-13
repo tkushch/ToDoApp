@@ -1,7 +1,3 @@
-/**
- * TasksViewModel - класс VM для связи визуальных элементов и репозитория (основной экран)
- */
-
 package com.example.todoapp.presentation.ui.screen.main_screen.viewmodel
 
 import android.util.Log
@@ -19,10 +15,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-
-class TasksViewModel @Inject constructor(
+/**
+ * TasksViewModel - класс VM для связи визуальных элементов и репозитория (основной экран)
+ */
+class TasksViewModel(
     private val todoItemsRepository: TodoItemsRepository,
 ) : ViewModel() {
 
@@ -45,9 +42,7 @@ class TasksViewModel @Inject constructor(
     val showCompletedTasks = _showCompletedTasks.asStateFlow()
 
     val currentTasks: StateFlow<List<TodoItem>> = combine(
-        showCompletedTasks,
-        todoItemsRepository.todoItems,
-        todoItemsRepository.uncompletedTodoItems
+        showCompletedTasks, todoItemsRepository.todoItems, todoItemsRepository.uncompletedTodoItems
     ) { showCompleted, allTasks, uncompletedTasks ->
         if (showCompleted) {
             allTasks
@@ -55,9 +50,7 @@ class TasksViewModel @Inject constructor(
             uncompletedTasks
         }
     }.stateIn(
-        viewModelScope,
-        SharingStarted.Lazily,
-        emptyList()
+        viewModelScope, SharingStarted.Lazily, emptyList()
     )
 
 

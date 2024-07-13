@@ -1,13 +1,6 @@
-/**
- * Activity для отображения главного экрана приложения
- * Отвечает за отображение фрагментов, связь между ними и доступ к общим частям приложения
- */
-
-
 package com.example.todoapp.presentation.ui
 
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
@@ -26,6 +19,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
+
+/**
+ * Activity для отображения главного экрана приложения
+ * Отвечает за отображение фрагментов, связь между ними и доступ к общим частям приложения
+ */
 class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskPressListener,
     MainFragment.OnFabClickListener, OnNetworkErrorListener {
 
@@ -39,14 +37,11 @@ class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskPressListener,
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        schedulePeriodicWork(applicationContext)
         (application as TodoApp).appComponent.activityComponentFactory().create(this).also {
             activityComponent = it
             it.inject(this)
         }
-
-
-
-        schedulePeriodicWork(applicationContext)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -100,11 +95,9 @@ class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskPressListener,
                 .addCallback(object : Snackbar.Callback() {
                     override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                         super.onDismissed(transientBottomBar, event)
-                        isShowingSnackbar =
-                            false
+                        isShowingSnackbar = false
                     }
-                })
-                .show()
+                }).show()
             isShowingSnackbar = true
         }
 
