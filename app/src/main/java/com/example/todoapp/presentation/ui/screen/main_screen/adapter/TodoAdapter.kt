@@ -1,7 +1,3 @@
-/**
- * TodoAdapter - класс адаптер для работы с RecyclerView, включает также TodoViewHolder и TodoDiffCallback
- */
-
 package com.example.todoapp.presentation.ui.screen.main_screen.adapter
 
 import android.graphics.Color
@@ -14,9 +10,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.R
 import com.example.todoapp.data.model.Importance
 import com.example.todoapp.data.model.TodoItem
-import java.time.LocalDateTime
 import com.example.todoapp.databinding.TodoItemBinding
+import java.time.LocalDateTime
 
+/**
+ * TodoAdapter - класс адаптер для работы с RecyclerView, включает также TodoViewHolder и TodoDiffCallback
+ */
 class TodoAdapter(
     private val onTasksChangedListener: OnTaskChangeListener,
     private val onTaskPressListener: OnTaskPressListener
@@ -59,16 +58,13 @@ class TodoAdapter(
             checkBox.setOnCheckedChangeListener(null)
             checkBox.isChecked = todoItem.done
             updateTextDecoration(todoItem.done, todoItem.deadline)
-
             checkBox.setOnCheckedChangeListener { _, isChecked ->
                 onTasksChangedListener.onTaskChanged(todoItem.id)
                 updateTextDecoration(isChecked, todoItem.deadline)
             }
-
             editClickArea.setOnClickListener {
                 onTaskPressListener.onTaskPressed(todoItem.id)
             }
-
             setUpImportance(todoItem.importance)
         }
 

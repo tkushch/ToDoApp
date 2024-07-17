@@ -1,9 +1,3 @@
-/**
- * Activity для отображения главного экрана приложения
- * Отвечает за отображение фрагментов, связь между ними и доступ к общим частям приложения
- */
-
-
 package com.example.todoapp.presentation.ui
 
 import android.os.Bundle
@@ -16,15 +10,27 @@ import com.example.todoapp.data.network.background.schedulePeriodicWork
 import com.example.todoapp.data.network.connectivity.ConnectivityObserver
 import com.example.todoapp.data.network.connectivity.OnNetworkErrorListener
 import com.example.todoapp.databinding.ActivityMainBinding
+import com.example.todoapp.di.ActivityComponent
 import com.example.todoapp.presentation.ui.screen.edit_screen.EditTaskFragmentCompose
 import com.example.todoapp.presentation.ui.screen.main_screen.MainFragment
 import com.example.todoapp.presentation.ui.screen.main_screen.adapter.TodoAdapter
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import javax.inject.Inject
 
+
+/**
+ * Activity для отображения главного экрана приложения
+ * Отвечает за отображение фрагментов, связь между ними и доступ к общим частям приложения
+ */
 class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskPressListener,
     MainFragment.OnFabClickListener, OnNetworkErrorListener {
+
+    @Inject
+    lateinit var connectivityObserver: ConnectivityObserver
+    lateinit var activityComponent: ActivityComponent
+
     private lateinit var binding: ActivityMainBinding
     private var previousStatus: ConnectivityObserver.Status = ConnectivityObserver.Status.Available
     private var isShowingSnackbar = false
@@ -32,6 +38,10 @@ class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskPressListener,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         schedulePeriodicWork(applicationContext)
+        (application as TodoApp).appComponent.activityComponentFactory().create(this).also {
+            activityComponent = it
+            it.inject(this)
+        }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -42,11 +52,11 @@ class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskPressListener,
             }
         }
 
-        (application as TodoApp).connectivityObserver.observe().onEach {
+        connectivityObserver.observe().onEach {
             handleConnectivityStatus(it)
         }.launchIn(lifecycleScope)
 
-        handleConnectivityStatus((application as TodoApp).connectivityObserver.checkCurrentStatus())
+        handleConnectivityStatus(connectivityObserver.checkCurrentStatus())
     }
 
     private fun showEditTaskFragment(taskId: String? = null) {
@@ -79,17 +89,15 @@ class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskPressListener,
         previousStatus = currentStatus
     }
 
-    override fun onNetworkError() {
+    override fun onNetworkError(message: String) {
         if (!isShowingSnackbar) {
             Snackbar.make(binding.root, getString(R.string.network_error), Snackbar.LENGTH_SHORT)
                 .addCallback(object : Snackbar.Callback() {
                     override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                         super.onDismissed(transientBottomBar, event)
-                        isShowingSnackbar =
-                            false
+                        isShowingSnackbar = false
                     }
-                })
-                .show()
+                }).show()
             isShowingSnackbar = true
         }
 

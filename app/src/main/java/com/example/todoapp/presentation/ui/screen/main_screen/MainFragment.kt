@@ -1,7 +1,3 @@
-/**
- * MainFragment - класс отвечающий за визуальную часть основного экрана
- */
-
 package com.example.todoapp.presentation.ui.screen.main_screen
 
 import android.content.Context
@@ -17,7 +13,6 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.todoapp.R
-import com.example.todoapp.TodoApp
 import com.example.todoapp.data.network.connectivity.ConnectivityObserver
 import com.example.todoapp.data.network.connectivity.OnNetworkErrorListener
 import com.example.todoapp.databinding.FragmentMainBinding
@@ -28,20 +23,23 @@ import com.example.todoapp.presentation.ui.screen.viewmodelfactory.TodoViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-
+/**
+ * MainFragment - класс отвечающий за визуальную часть основного экрана
+ */
 class MainFragment : Fragment(), TodoAdapter.OnTaskChangeListener {
     interface OnFabClickListener {
         fun onFloatingActionButtonClick()
     }
 
-    private val tasksViewModel: TasksViewModel by viewModels {
-        TodoViewModelFactory(
-            (requireActivity().application as TodoApp).todoItemsRepository,
-            (requireActivity().application as TodoApp).connectivityObserver,
-            requireActivity() as OnNetworkErrorListener
-        )
-    }
+    @Inject
+    lateinit var viewModelFactory: TodoViewModelFactory
+
+    @Inject
+    lateinit var connectivityObserver: ConnectivityObserver
+
+    private val tasksViewModel: TasksViewModel by viewModels { viewModelFactory }
     private var onFabClickListener: OnFabClickListener? = null
     private var todoAdapter: TodoAdapter? = null
     private var _binding: FragmentMainBinding? = null
@@ -58,6 +56,9 @@ class MainFragment : Fragment(), TodoAdapter.OnTaskChangeListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        (requireContext() as MainActivity).activityComponent.fragmentComponentFactory().create()
+            .inject(this)
 
         binding.tasksRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         todoAdapter = TodoAdapter(this, requireActivity() as MainActivity)
@@ -105,14 +106,19 @@ class MainFragment : Fragment(), TodoAdapter.OnTaskChangeListener {
                 .collect { todoAdapter?.submitList(it) }
         }
 
-        (requireActivity().application as TodoApp).connectivityObserver.observe().onEach {
+        lifecycleScope.launch {
+            tasksViewModel.networkErrors.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .collect { errorMessage ->
+                    (requireActivity() as OnNetworkErrorListener).onNetworkError(errorMessage)
+                }
+        }
+
+        connectivityObserver.observe().onEach {
             if (it == ConnectivityObserver.Status.Available) {
                 tasksViewModel.refreshTasks()
                 todoAdapter?.notifyDataSetChanged() // to ignore "Diff" and correct checkboxes after offline view changes
             }
         }.launchIn(lifecycleScope)
-
-
     }
 
 

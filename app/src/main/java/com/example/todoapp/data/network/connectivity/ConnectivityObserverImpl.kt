@@ -1,7 +1,3 @@
-/**
- * NetworkConnectivityObserver - отвечает за информацию о доступности сети
- */
-
 package com.example.todoapp.data.network.connectivity
 
 import android.content.Context
@@ -14,8 +10,10 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
-
-class NetworkConnectivityObserver(
+/**
+ * NetworkConnectivityObserver - отвечает за информацию о доступности сети
+ */
+class ConnectivityObserverImpl(
     context: Context
 ) : ConnectivityObserver {
     private val connectivityManager =
@@ -52,9 +50,11 @@ class NetworkConnectivityObserver(
         }.distinctUntilChanged()
     }
 
-    fun checkCurrentStatus(): ConnectivityObserver.Status {
-        val network = connectivityManager.activeNetwork ?: return ConnectivityObserver.Status.Unavailable
-        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return ConnectivityObserver.Status.Unavailable
+    override fun checkCurrentStatus(): ConnectivityObserver.Status {
+        val network =
+            connectivityManager.activeNetwork ?: return ConnectivityObserver.Status.Unavailable
+        val capabilities = connectivityManager.getNetworkCapabilities(network)
+            ?: return ConnectivityObserver.Status.Unavailable
         return when {
             capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> ConnectivityObserver.Status.Available
             capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> ConnectivityObserver.Status.Available

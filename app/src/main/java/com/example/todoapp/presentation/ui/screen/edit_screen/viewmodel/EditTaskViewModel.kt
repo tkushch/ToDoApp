@@ -1,6 +1,3 @@
-/**
- * EditTaskViewModel - класс VM для связи визуальных элементов и репозитория (экран редактирования задачи)
- */
 package com.example.todoapp.presentation.ui.screen.edit_screen.viewmodel
 
 import android.util.Log
@@ -8,21 +5,28 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.todoapp.data.model.Importance
 import com.example.todoapp.data.model.TodoItem
-import com.example.todoapp.data.network.connectivity.ConnectivityObserver
-import com.example.todoapp.data.network.connectivity.OnNetworkErrorListener
 import com.example.todoapp.data.repository.TodoItemsRepository
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
+/**
+ * EditTaskViewModel - класс VM для связи визуальных элементов и репозитория (экран редактирования задачи)
+ */
 class EditTaskViewModel(
     private val todoItemsRepository: TodoItemsRepository,
-    private val onNetworkErrorListener: OnNetworkErrorListener?
 ) : ViewModel() {
+
+    private val _networkErrors = MutableSharedFlow<String>()
+    val networkErrors: SharedFlow<String> = _networkErrors
 
     private val handler = CoroutineExceptionHandler { _, exception ->
         Log.e("EditTaskViewModel", "Error: ${exception.message}")
-        onNetworkErrorListener?.onNetworkError()
+        viewModelScope.launch {
+            _networkErrors.emit(exception.toString())
+        }
     }
 
     private var _todoItem: TodoItem? = null

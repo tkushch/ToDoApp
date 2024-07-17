@@ -1,17 +1,14 @@
-/**
- * TasksViewModel - класс VM для связи визуальных элементов и репозитория (основной экран)
- */
-
 package com.example.todoapp.presentation.ui.screen.main_screen.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.todoapp.data.model.TodoItem
-import com.example.todoapp.data.network.connectivity.OnNetworkErrorListener
 import com.example.todoapp.data.repository.TodoItemsRepository
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,16 +16,21 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-
+/**
+ * TasksViewModel - класс VM для связи визуальных элементов и репозитория (основной экран)
+ */
 class TasksViewModel(
     private val todoItemsRepository: TodoItemsRepository,
-    private val onNetworkErrorListener: OnNetworkErrorListener? = null
 ) : ViewModel() {
 
+    private val _networkErrors = MutableSharedFlow<String>()
+    val networkErrors: SharedFlow<String> = _networkErrors
 
     private val handler = CoroutineExceptionHandler { _, exception ->
         Log.e("TasksViewModel", exception.toString())
-        onNetworkErrorListener?.onNetworkError()
+        viewModelScope.launch {
+            _networkErrors.emit(exception.toString())
+        }
     }
 
 
@@ -40,9 +42,7 @@ class TasksViewModel(
     val showCompletedTasks = _showCompletedTasks.asStateFlow()
 
     val currentTasks: StateFlow<List<TodoItem>> = combine(
-        showCompletedTasks,
-        todoItemsRepository.todoItems,
-        todoItemsRepository.uncompletedTodoItems
+        showCompletedTasks, todoItemsRepository.todoItems, todoItemsRepository.uncompletedTodoItems
     ) { showCompleted, allTasks, uncompletedTasks ->
         if (showCompleted) {
             allTasks
@@ -50,9 +50,7 @@ class TasksViewModel(
             uncompletedTasks
         }
     }.stateIn(
-        viewModelScope,
-        SharingStarted.Lazily,
-        emptyList()
+        viewModelScope, SharingStarted.Lazily, emptyList()
     )
 
 

@@ -1,13 +1,10 @@
-/**
- * TodoItem - модель для хранения "задач"
- */
-
-
-
 package com.example.todoapp.data.model
 
 import java.time.LocalDateTime
 
+/**
+ * TodoItem - модель для хранения "задач"
+ */
 data class TodoItem(
     val id: String,
     val text: String,
