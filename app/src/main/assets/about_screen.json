@@ -151,6 +151,12 @@
           "height": {
             "type": "match_parent"
           },
+          "background": [
+            {
+              "type": "solid",
+              "color": "@color/background_color"
+            }
+          ],
           "items": [
             {
               "type": "text",

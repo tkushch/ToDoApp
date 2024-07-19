@@ -144,7 +144,6 @@ class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskPressListener,
     private fun createDivConfiguration(): DivConfiguration {
         return DivConfiguration.Builder(PicassoDivImageLoader(this))
             .actionHandler(SampleDivActionHandler(this))
-            .visualErrorsEnabled(true)
             .build()
     }
 
