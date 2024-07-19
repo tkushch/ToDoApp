@@ -27,7 +27,7 @@ fun DropDownMenu(
             text = {
                 Text(
                     stringResource(R.string.todo_priority_low),
-                    color = AppTheme.colorScheme.labelPrimary
+                    color = AppTheme.colorScheme.labelPrimary,
                 )
             },
             onClick = { onSelect(Importance.LOW) },

@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.room.Room
+import com.example.todoapp.TodoApp
 import com.example.todoapp.data.db.TodoDatabase
 import com.example.todoapp.data.db.TodoItemDao
 import com.example.todoapp.data.network.RetrofitClient
@@ -12,6 +13,8 @@ import com.example.todoapp.data.network.background.UpdateWorker
 import com.example.todoapp.data.network.connectivity.ConnectivityObserver
 import com.example.todoapp.data.network.connectivity.ConnectivityObserverImpl
 import com.example.todoapp.data.repository.TodoItemsRepository
+import com.example.todoapp.presentation.ui.theme.control.PreferenceManager
+import com.example.todoapp.presentation.ui.theme.control.ThemeController
 import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
@@ -22,9 +25,10 @@ import javax.inject.Singleton
 
 
 @Singleton
-@Component(modules = [AppModule::class, NetworkModule::class, RepositoryModule::class, ConnectivityModule::class, DatabaseModule::class, SharedPreferencesModule::class])
+@Component(modules = [AppModule::class, NetworkModule::class, RepositoryModule::class, ConnectivityModule::class, DatabaseModule::class, SharedPreferencesModule::class, ThemeModule::class])
 interface AppComponent {
     fun inject(application: UpdateWorker)
+    fun inject(application: TodoApp)
     fun activityComponentFactory(): ActivityComponent.Factory
 
     @Component.Factory
@@ -112,5 +116,20 @@ object SharedPreferencesModule {
     @Singleton
     fun provideSharedPreferences(context: Context): SharedPreferences {
         return context.getSharedPreferences("todo_app_prefs", Context.MODE_PRIVATE)
+    }
+}
+
+@Module
+object ThemeModule {
+    @Provides
+    @Singleton
+    fun providePreferenceManager(context: Context): PreferenceManager {
+        return PreferenceManager(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideThemeController(preferenceManager: PreferenceManager): ThemeController {
+        return ThemeController(preferenceManager)
     }
 }

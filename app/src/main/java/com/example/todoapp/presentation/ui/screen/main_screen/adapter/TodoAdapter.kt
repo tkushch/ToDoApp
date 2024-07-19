@@ -1,9 +1,9 @@
 package com.example.todoapp.presentation.ui.screen.main_screen.adapter
 
-import android.graphics.Color
 import android.graphics.Paint
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -73,32 +73,32 @@ class TodoAdapter(
             when (importance) {
                 Importance.LOW -> {
                     tvImportance.text = context.getString(R.string.empty_string)
-                    tvImportance.setTextColor(Color.BLACK)
                 }
 
                 Importance.BASIC -> {
                     tvImportance.text = context.getString(R.string.medium_importance_symbol)
-                    tvImportance.setTextColor(Color.BLACK)
+                    tvImportance.setTextColor(ContextCompat.getColor(context, R.color.label_primary))
                 }
 
                 Importance.IMPORTANT -> {
                     tvImportance.text = context.getString(R.string.high_importance_symbol)
-                    tvImportance.setTextColor(Color.RED)
+                    tvImportance.setTextColor(ContextCompat.getColor(context, R.color.color_red))
                 }
             }
         }
 
 
         private fun updateTextDecoration(done: Boolean, deadline: LocalDateTime?) {
+            val context = itemView.context
             if (done) {
                 tv.paintFlags = tv.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-                tv.setTextColor(Color.GRAY)
+                tv.setTextColor(ContextCompat.getColor(context, R.color.label_tertiary))
             } else if (deadline != null && deadline <= LocalDateTime.now()) {
                 tv.paintFlags = tv.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
-                tv.setTextColor(Color.RED)
+                tv.setTextColor(ContextCompat.getColor(context, R.color.color_red))
             } else {
                 tv.paintFlags = tv.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
-                tv.setTextColor(Color.BLACK)
+                tv.setTextColor(ContextCompat.getColor(context, R.color.label_primary))
             }
         }
     }

@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.todoapp"
-        minSdk = 26
+        minSdk = 28
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -73,6 +73,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.recyclerview:recyclerview-selection:1.1.0")
     implementation("androidx.compose.ui:ui-tooling-preview-android:1.6.8")
+    implementation(platform("androidx.compose:compose-bom:2023.06.01"))
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -92,4 +93,12 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("androidx.work:work-runtime-ktx:2.9.0")
+
+    val divKitVersion = "30.9.0"
+    implementation("com.yandex.div:div:$divKitVersion")
+    implementation("com.yandex.div:div-core:$divKitVersion")
+    implementation("com.yandex.div:div-json:$divKitVersion")
+    implementation("com.yandex.div:picasso:$divKitVersion")
+    implementation("com.yandex.div:glide:$divKitVersion")
+
 }
