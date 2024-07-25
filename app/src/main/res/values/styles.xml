@@ -1,6 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <style name="CustomSnackbar" parent="Widget.MaterialComponents.Snackbar">
         <item name="android:minHeight">64dp</item>
+    </style>
+
+
+    <!-- Base Text Style -->
+    <style name="BaseText">
+        <item name="android:fontFamily">@font/roboto_regular</item>
+    </style>
+
+    <!-- Large Title Style -->
+    <style name="LargeTitle" parent="BaseText">
+        <item name="android:textSize">32sp</item>
+        <item name="android:lineHeight">38sp</item>
+        <item name="android:fontWeight">500</item>
+    </style>
+
+    <!-- Title Style -->
+    <style name="Title" parent="BaseText">
+        <item name="android:textSize">20sp</item>
+        <item name="android:lineHeight">32sp</item>
+        <item name="android:fontWeight">500</item>
+    </style>
+
+    <!-- Button Text Style -->
+    <style name="ButtonText" parent="BaseText">
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">24sp</item>
+        <item name="android:fontWeight">500</item>
+    </style>
+
+    <!-- Body Text Style -->
+    <style name="BodyText" parent="BaseText">
+        <item name="android:textSize">16sp</item>
+        <item name="android:lineHeight">20sp</item>
+        <item name="android:fontWeight">400</item>
+    </style>
+
+    <!-- Subhead Text Style -->
+    <style name="SubheadText" parent="BaseText">
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">20sp</item>
+        <item name="android:fontWeight">400</item>
     </style>
 </resources>

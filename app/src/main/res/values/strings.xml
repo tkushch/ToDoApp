@@ -31,4 +31,11 @@
     <string name="refresh_button">refresh_button</string>
     <string name="refresh">Обновление</string>
     <string name="network_error">Не удалось связаться с сервером</string>
+    <string name="choose_theme">Выберите тему</string>
+    <string name="light_theme_name">Всегда светлая</string>
+    <string name="dark_theme_name">Всегда тёмная</string>
+    <string name="as_in_system_theme_name">Как в системе</string>
+    <string name="close_settings_button_text">Назад</string>
+    <string name="open_theme_settings_button">Open theme settings button</string>
+    <string name="open_about_app_page_button">open about app page button</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.example.todoapp.presentation.ui
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
@@ -11,21 +12,34 @@ import com.example.todoapp.data.network.connectivity.ConnectivityObserver
 import com.example.todoapp.data.network.connectivity.OnNetworkErrorListener
 import com.example.todoapp.databinding.ActivityMainBinding
 import com.example.todoapp.di.ActivityComponent
+import com.example.todoapp.presentation.ui.screen.divkit_screen.Div2ViewFactory
+import com.example.todoapp.presentation.ui.screen.divkit_screen.SampleDivActionHandler
+import com.example.todoapp.presentation.ui.screen.divkit_screen.replaceColorsInJson
 import com.example.todoapp.presentation.ui.screen.edit_screen.EditTaskFragmentCompose
 import com.example.todoapp.presentation.ui.screen.main_screen.MainFragment
 import com.example.todoapp.presentation.ui.screen.main_screen.adapter.TodoAdapter
+import com.example.todoapp.presentation.ui.screen.setting_screen.SettingsFragment
 import com.google.android.material.snackbar.Snackbar
+import com.yandex.div.core.Div2Context
+import com.yandex.div.core.DivConfiguration
+import com.yandex.div.picasso.PicassoDivImageLoader
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.json.JSONObject
 import javax.inject.Inject
 
+interface OnChangeFragmentListener {
+    fun onFloatingActionButtonClick()
+    fun onSettingsButtonClick()
+    fun onInfoButtonClick()
+}
 
 /**
  * Activity для отображения главного экрана приложения
  * Отвечает за отображение фрагментов, связь между ними и доступ к общим частям приложения
  */
 class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskPressListener,
-    MainFragment.OnFabClickListener, OnNetworkErrorListener {
+    OnChangeFragmentListener, OnNetworkErrorListener {
 
     @Inject
     lateinit var connectivityObserver: ConnectivityObserver
@@ -62,6 +76,26 @@ class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskPressListener,
     private fun showEditTaskFragment(taskId: String? = null) {
         val fragment = EditTaskFragmentCompose.newInstance(taskId)
         supportFragmentManager.commit {
+            setCustomAnimations(
+                R.anim.enter_from_right,
+                R.anim.exit_to_left,
+                R.anim.enter_from_left,
+                R.anim.exit_to_right
+            )
+            replace(R.id.fragment_container, fragment)
+            addToBackStack(null)
+        }
+    }
+
+    private fun showSettingsFragment() {
+        val fragment = SettingsFragment()
+        supportFragmentManager.commit {
+            setCustomAnimations(
+                R.anim.enter_from_right,
+                R.anim.exit_to_left,
+                R.anim.enter_from_left,
+                R.anim.exit_to_right
+            )
             replace(R.id.fragment_container, fragment)
             addToBackStack(null)
         }
@@ -73,6 +107,10 @@ class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskPressListener,
 
     override fun onFloatingActionButtonClick() {
         showEditTaskFragment()
+    }
+
+    override fun onSettingsButtonClick() {
+        showSettingsFragment()
     }
 
     private fun handleConnectivityStatus(status: ConnectivityObserver.Status? = null) {
@@ -101,5 +139,37 @@ class MainActivity : AppCompatActivity(), TodoAdapter.OnTaskPressListener,
             isShowingSnackbar = true
         }
 
+    }
+
+    private fun createDivConfiguration(): DivConfiguration {
+        return DivConfiguration.Builder(PicassoDivImageLoader(this))
+            .actionHandler(SampleDivActionHandler(this))
+            .build()
+    }
+
+    override fun onInfoButtonClick() {
+        val jsonString = assets.open("about_screen.json").bufferedReader().use { it.readText() }
+        val updatedJsonString = replaceColorsInJson(this, jsonString)
+        val divJson = JSONObject(updatedJsonString)
+        val templatesJson = divJson.optJSONObject("templates")
+        val cardJson = divJson.getJSONObject("card")
+
+        val divContext = Div2Context(
+            baseContext = this,
+            configuration = createDivConfiguration(),
+            lifecycleOwner = this
+        )
+
+        val divView = Div2ViewFactory(divContext, templatesJson).createView(cardJson)
+        val divContainer = binding.divContainer
+        divContainer.removeAllViews()
+        divContainer.addView(divView)
+        divContainer.visibility = View.VISIBLE
+        binding.fragmentContainer.visibility = View.GONE
+    }
+
+    fun onBackButtonClick() {
+        binding.divContainer.visibility = View.GONE
+        binding.fragmentContainer.visibility = View.VISIBLE
     }
 }

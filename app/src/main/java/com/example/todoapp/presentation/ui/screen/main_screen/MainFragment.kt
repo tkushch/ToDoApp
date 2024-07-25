@@ -17,6 +17,7 @@ import com.example.todoapp.data.network.connectivity.ConnectivityObserver
 import com.example.todoapp.data.network.connectivity.OnNetworkErrorListener
 import com.example.todoapp.databinding.FragmentMainBinding
 import com.example.todoapp.presentation.ui.MainActivity
+import com.example.todoapp.presentation.ui.OnChangeFragmentListener
 import com.example.todoapp.presentation.ui.screen.main_screen.adapter.TodoAdapter
 import com.example.todoapp.presentation.ui.screen.main_screen.viewmodel.TasksViewModel
 import com.example.todoapp.presentation.ui.screen.viewmodelfactory.TodoViewModelFactory
@@ -29,9 +30,6 @@ import javax.inject.Inject
  * MainFragment - класс отвечающий за визуальную часть основного экрана
  */
 class MainFragment : Fragment(), TodoAdapter.OnTaskChangeListener {
-    interface OnFabClickListener {
-        fun onFloatingActionButtonClick()
-    }
 
     @Inject
     lateinit var viewModelFactory: TodoViewModelFactory
@@ -40,7 +38,7 @@ class MainFragment : Fragment(), TodoAdapter.OnTaskChangeListener {
     lateinit var connectivityObserver: ConnectivityObserver
 
     private val tasksViewModel: TasksViewModel by viewModels { viewModelFactory }
-    private var onFabClickListener: OnFabClickListener? = null
+    private var onChangeFragmentListener: OnChangeFragmentListener? = null
     private var todoAdapter: TodoAdapter? = null
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
@@ -70,12 +68,19 @@ class MainFragment : Fragment(), TodoAdapter.OnTaskChangeListener {
 
         binding.refreshButton.setOnClickListener {
             tasksViewModel.refreshTasks()
-            todoAdapter?.notifyDataSetChanged() // to ignore "Diff" and correct checkboxes after offline view changes
             Toast.makeText(requireContext(), getString(R.string.refresh), Toast.LENGTH_SHORT).show()
         }
 
+        binding.settingsButton.setOnClickListener {
+            (requireActivity() as MainActivity).onSettingsButtonClick()
+        }
+
+        binding.aboutButton.setOnClickListener {
+            (requireActivity() as MainActivity).onInfoButtonClick()
+        }
+
         binding.fab.setOnClickListener {
-            onFabClickListener?.onFloatingActionButtonClick()
+            onChangeFragmentListener?.onFloatingActionButtonClick()
         }
 
         subscribeToObservables()
@@ -116,7 +121,6 @@ class MainFragment : Fragment(), TodoAdapter.OnTaskChangeListener {
         connectivityObserver.observe().onEach {
             if (it == ConnectivityObserver.Status.Available) {
                 tasksViewModel.refreshTasks()
-                todoAdapter?.notifyDataSetChanged() // to ignore "Diff" and correct checkboxes after offline view changes
             }
         }.launchIn(lifecycleScope)
     }
@@ -124,16 +128,16 @@ class MainFragment : Fragment(), TodoAdapter.OnTaskChangeListener {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context is OnFabClickListener) {
-            onFabClickListener = context
+        if (context is OnChangeFragmentListener) {
+            onChangeFragmentListener = context
         } else {
-            throw RuntimeException("$context must implement OnButtonClickListener")
+            throw RuntimeException("$context must implement OnChangeFragmentListener")
         }
     }
 
     override fun onDetach() {
         super.onDetach()
-        onFabClickListener = null
+        onChangeFragmentListener = null
     }
 
     override fun onDestroyView() {
